@@ -14,22 +14,35 @@
     <ImageView
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/ic_lock"
+        android:src="@drawable/ic_people"
         android:layout_marginBottom="16dp"/>
 
     <!-- Tiêu đề -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome Back!"
+        android:text="Create an Account"
         android:textColor="@color/white"
         android:textSize="30dp"
         android:textStyle="bold"
         android:layout_marginBottom="24dp"/>
 
+    <!-- Ô nhập Username -->
+    <EditText
+        android:id="@+id/register_username"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="Username"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:background="@drawable/edittext"
+        android:paddingStart="16dp"
+        android:drawableStart="@drawable/ic_user"
+        android:drawablePadding="10dp"
+        android:layout_marginBottom="16dp"/>
     <!-- Ô nhập Email -->
     <EditText
-        android:id="@+id/login_email"
+        android:id="@+id/register_email"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:hint="Email"
@@ -41,10 +54,10 @@
         android:drawablePadding="10dp"
         android:layout_marginBottom="16dp"/>
 
-    <!-- Ô nhập Password (Dùng TextInputLayout để hiển thị icon ẩn hiện mật khẩu) -->
+
     <!-- Ô nhập mật khẩu -->
     <EditText
-        android:id="@+id/login_password"
+        android:id="@+id/register_password"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:hint="Password"
@@ -55,89 +68,80 @@
         android:paddingStart="16dp"
         android:drawablePadding="5dp"
         android:paddingEnd="48dp"
-        android:inputType="textPassword"/>
+        android:inputType="textPassword"
+        android:layout_marginBottom="16dp"/>
 
-
-    <!-- Quên mật khẩu -->
-    <TextView
-        android:id="@+id/login_forgot_password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:text="Forgot Password?"
-        android:textColor="@color/white"
-        android:textSize="14dp"
-        android:layout_gravity="end"
-        android:layout_marginBottom="24dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"/>
-
-
-    <!-- Nút Sign in -->
-    <Button
-        android:id="@+id/login_btn_sign_in"
+    <!-- Ô nhập Phone -->
+    <EditText
+        android:id="@+id/register_phone"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="Sign in"
+        android:hint="Phone"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:background="@drawable/edittext"
+        android:paddingStart="16dp"
+        android:drawableStart="@drawable/ic_phone"
+        android:drawablePadding="10dp"
+        android:layout_marginBottom="16dp"/>
+
+    <LinearLayout
+        android:id="@+id/register_checkbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <CheckBox
+            android:id="@+id/cb_agree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/white"/>
+
+        <TextView
+            android:id="@+id/tv_terms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I hereby agree to the terms of services and privacy policy"
+            android:textColor="@color/white"
+            android:textSize="14dp"
+            android:paddingStart="8dp"/>
+    </LinearLayout>
+
+
+
+    <!-- Nút Create Account-->
+    <Button
+        android:id="@+id/register_btn_createaccount"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Create Account"
         android:textAllCaps="false"
         android:textSize="18dp"
         android:textColor="@color/white"
         android:background="@drawable/button"
         android:layout_marginBottom="16dp"/>
 
-    <!-- Nút Sign in với Google -->
-    <LinearLayout
-        android:id="@+id/login_btn_google"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:background="@drawable/edittext"
-        android:foreground="?attr/selectableItemBackground"
-        android:padding="10dp"
-        android:clickable="true"
-        android:focusable="true">
-
-        <!-- Icon Google -->
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_google"
-            android:layout_marginEnd="8dp"/>
-
-        <!-- Chữ "Sign in with Google" -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sign in with Google"
-            android:textColor="@color/white"
-            android:textSize="16dp"
-            android:textStyle="bold"/>
-    </LinearLayout>
-
-
-
-
-    <!-- Đăng ký tài khoản -->
+    <!-- ss -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="10dp"
-        android:gravity="end">
+        android:gravity="center">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Don't have an account? "
+            android:text="Already have an account? "
             android:textColor="@color/white"
             android:textSize="14dp"
             android:layout_gravity="center"/>
 
         <TextView
-            android:id="@+id/login_signup"
+            android:id="@+id/register_signin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sign up"
+            android:text="Sign in"
             android:textColor="@color/white"
             android:textSize="15dp"
             android:textStyle="bold"
