@@ -1,10 +1,12 @@
 package com.example.mobileproject.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class Course {
+public class Course implements Serializable {
     private Integer courseId;
     private Integer ownerId;
     private String title;
@@ -13,13 +15,17 @@ public class Course {
     private LocalDateTime createdAt;
     private Float price;
     private User instructor;
-    private List<Wishlist> wishlists = new ArrayList<>();
-    private List<Enrollment> enrollments = new ArrayList<>();
-    private List<Lesson> lessons = new ArrayList<>();
-    private List<Review> reviews = new ArrayList<>();
+    private List<Wishlist> wishlists;
+    private List<Enrollment> enrollments;
+    private List<Lesson> lessons;
+    private List<Review> reviews;
 
     // Constructor
     public Course() {
+        this.wishlists = new ArrayList<>();
+        this.enrollments = new ArrayList<>();
+        this.lessons = new ArrayList<>();
+        this.reviews = new ArrayList<>();
     }
 
     // Getters and Setters
@@ -47,4 +53,11 @@ public class Course {
     public void setLessons(List<Lesson> lessons) { this.lessons = lessons; }
     public List<Review> getReviews() { return reviews; }
     public void setReviews(List<Review> reviews) { this.reviews = reviews; }
+
+    public List<User> getUsers() {
+        return enrollments.stream()
+                .map(Enrollment::getUser)
+                .collect(Collectors.toList());
+    }
+
 }

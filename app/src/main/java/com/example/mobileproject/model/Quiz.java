@@ -1,10 +1,11 @@
 package com.example.mobileproject.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Quiz {
+public class Quiz implements Serializable {
     private Integer quizId;
     private Integer lessonId;
     private String title;

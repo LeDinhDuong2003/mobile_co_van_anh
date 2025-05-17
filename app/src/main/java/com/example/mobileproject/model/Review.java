@@ -1,8 +1,9 @@
 package com.example.mobileproject.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Review {
+public class Review implements Serializable {
     private Integer reviewId;
     private Integer userId;
     private Integer courseId;

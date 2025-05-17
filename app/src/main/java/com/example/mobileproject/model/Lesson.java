@@ -1,11 +1,11 @@
 package com.example.mobileproject.model;
 
-import org.w3c.dom.Comment;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Lesson {
+public class Lesson implements Serializable {
     private Integer lessonId;
     private Integer courseId;
     private String title;

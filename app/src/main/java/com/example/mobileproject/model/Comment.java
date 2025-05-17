@@ -1,8 +1,9 @@
 package com.example.mobileproject.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Comment {
+public class Comment implements Serializable {
     private Integer commentId;
     private Integer userId;
     private Integer lessonId;
@@ -10,7 +11,6 @@ public class Comment {
     private LocalDateTime createdAt;
     private User user;
     private Lesson lesson;
-
     // Constructor
     public Comment() {
     }

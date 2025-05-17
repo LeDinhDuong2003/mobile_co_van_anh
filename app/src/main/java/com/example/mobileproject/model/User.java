@@ -2,11 +2,13 @@ package com.example.mobileproject.model;
 
 import org.w3c.dom.Comment;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class User {
+public class User implements Serializable {
     private Integer userId;
     private String username;
     private String fullName;
@@ -61,4 +63,11 @@ public class User {
     public void setQuizResults(List<QuizResult> quizResults) { this.quizResults = quizResults; }
     public List<Notification> getNotifications() { return notifications; }
     public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
+
+    public List<Course> getCourses() {
+        return enrollments.stream()
+                .map(Enrollment::getCourse)
+                .collect(Collectors.toList());
+    }
+
 }
