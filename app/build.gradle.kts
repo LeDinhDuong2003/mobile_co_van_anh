@@ -39,7 +39,5 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-//    implementation(libs.credentials)
-//    implementation(libs.credentials.play.services.auth)
     implementation(libs.play.services.auth)
 }

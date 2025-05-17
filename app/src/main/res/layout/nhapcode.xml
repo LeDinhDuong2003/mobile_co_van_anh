@@ -105,7 +105,14 @@
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground"
         android:gravity="center"/>
-
+    <TextView
+        android:id="@+id/countdown_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mã hết hạn sau: 10:00"
+        android:textColor="@color/white"
+        android:textSize="14dp"
+        android:gravity="center"/>
 
 
 </LinearLayout>

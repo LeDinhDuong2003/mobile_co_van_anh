@@ -9,9 +9,13 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.mobileproject.model.User;
 import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -22,7 +26,7 @@ import java.net.URL;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText edtEmail, edtPassword;
+    private EditText edtUsername, edtPassword;
     private Button btnSignIn;
     private LinearLayout btnGoogle;
     private TextView txtForgotPassword, txtSignUp;
@@ -30,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     private GoogleSignInClient googleSignInClient;
     private ActivityResultLauncher<Intent> googleSignInLauncher;
 
-    private static final String TAG = "🔥 MY_APP_LOG 🔥";
+    private static final String TAG = "🔥 quan 🔥";
     private static final String CLIENT_ID = "466919745508-kdrtei827o3e2ml0tbdsjsb794s8ku6c.apps.googleusercontent.com";
 
     @Override
@@ -48,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.dangnhap);
 
         // Ánh xạ view
-        edtEmail = findViewById(R.id.login_username);
+        edtUsername = findViewById(R.id.login_username);
         edtPassword = findViewById(R.id.login_password);
         btnSignIn = findViewById(R.id.login_btn_sign_in);
         btnGoogle = findViewById(R.id.login_btn_google);
@@ -75,57 +79,99 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-        // Đăng nhập Email/Password (giả lập)
-//        btnSignIn.setOnClickListener(v -> {
-//            String email = edtEmail.getText().toString().trim();
-//            String password = edtPassword.getText().toString().trim();
-//
-//            if (email.isEmpty() || password.isEmpty()) {
-//                Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
-//            } else {
-//                new Thread(() -> {
-//                    try {
-//                        URL url = new URL("http://10.0.2.2:8000/auth/login"); // 10.0.2.2 là localhost của PC
-//                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//                        conn.setRequestMethod("POST");
-//                        conn.setRequestProperty("Content-Type", "application/json");
-//                        conn.setDoOutput(true);
-//
-//                        String jsonInputString = "{ \"email\": \"" + email + "\", \"password\": \"" + password + "\" }";
-//
-//                        try (OutputStream os = conn.getOutputStream()) {
-//                            byte[] input = jsonInputString.getBytes("utf-8");
-//                            os.write(input, 0, input.length);
-//                        }
-//
-//                        int code = conn.getResponseCode();
-//                        InputStream is = (code == 200) ? conn.getInputStream() : conn.getErrorStream();
-//
-//                        BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
-//                        StringBuilder response = new StringBuilder();
-//                        String responseLine;
-//
-//                        while ((responseLine = br.readLine()) != null) {
-//                            response.append(responseLine.trim());
-//                        }
-//
-//                        String res = response.toString();
-//
-//                        runOnUiThread(() -> {
-//                            if (code == 200) {
-//                                Toast.makeText(this, "Đăng nhập thành công: " + res, Toast.LENGTH_SHORT).show();
-//                            } else {
-//                                Toast.makeText(this, "Lỗi đăng nhập: " + res, Toast.LENGTH_SHORT).show();
-//                            }
-//                        });
-//
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                        runOnUiThread(() -> Toast.makeText(this, "Lỗi kết nối: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-//                    }
-//                }).start();
-//            }
-//        });
+        // LoginActivity.java
+        btnSignIn.setOnClickListener(v -> {
+            String username = edtUsername.getText().toString().trim();
+            String password = edtPassword.getText().toString().trim();
+            Log.d(TAG, "🔥 Attempting login with username: " + username);
+            if (username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập username và password", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            new Thread(() -> {
+                try {
+                    Log.d(TAG, "🔥 Sending POST to http://192.168.0.100:8000/auth/login");
+                    URL url = new URL(getString(R.string.base_url) + "/auth/login");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setDoOutput(true);
+                    conn.setConnectTimeout(5000); // Timeout 5s
+                    conn.setReadTimeout(5000);
+
+                    JSONObject jsonInput = new JSONObject();
+                    jsonInput.put("username", username);
+                    jsonInput.put("password", password);
+                    String jsonString = jsonInput.toString();
+                    Log.d(TAG, "🔥 Request body: " + jsonString);
+
+                    try (OutputStream os = conn.getOutputStream()) {
+                        byte[] input = jsonString.getBytes("utf-8");
+                        os.write(input, 0, input.length);
+                    }
+
+                    int responseCode = conn.getResponseCode();
+                    Log.d(TAG, "🔥 Response code: " + responseCode);
+
+                    InputStream inputStream = (responseCode >= 200 && responseCode < 300)
+                            ? conn.getInputStream()
+                            : conn.getErrorStream();
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    reader.close();
+                    conn.disconnect();
+
+                    String jsonResponse = response.toString();
+                    Log.d(TAG, "🔥 Server response: " + jsonResponse);
+
+                    runOnUiThread(() -> {
+                        if (responseCode >= 200 && responseCode < 300) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(jsonResponse);
+                                User user = new User();
+                                user.setUserId(jsonObject.getInt("user_id"));
+                                user.setFullName(jsonObject.getString("full_name"));
+                                user.setEmail(jsonObject.getString("email"));
+                                user.setPhone(jsonObject.optString("phone", null));
+                                user.setAvatarUrl(jsonObject.optString("avatar_url", null));
+                                user.setGoogleId(jsonObject.optString("google_id", null));
+                                user.setRole(jsonObject.optString("role", null));
+
+                                Toast.makeText(this, "Đăng nhập thành công: " + user.getFullName(), Toast.LENGTH_LONG).show();
+                                Log.d(TAG, "🔥 User ID: " + user.getUserId());
+
+//                                Intent intent = new Intent(this, MainActivity.class);
+//                                startActivity(intent);
+//                                finish();
+                            } catch (JSONException e) {
+                                Log.e(TAG, "JSON parse error: ", e);
+                                Toast.makeText(this, "Lỗi phân tích dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            try {
+                                JSONObject errorJson = new JSONObject(jsonResponse);
+                                String errorMessage = errorJson.optString("detail", "Sai tài khoản hoặc mật khẩu");
+                                Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+                            } catch (JSONException e) {
+                                Toast.makeText(this, "Sai tài khoản hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "Network error: ", e);
+                    runOnUiThread(() ->
+                            Toast.makeText(this, "Lỗi kết nối: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+            }).start();
+        });
+
 
 
         // Đăng nhập bằng Google
@@ -135,42 +181,116 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         // Quên mật khẩu
-        txtForgotPassword.setOnClickListener(v ->
-                Toast.makeText(this, "Forgot password clicked", Toast.LENGTH_SHORT).show());
+        txtForgotPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ForgotPasswordActivity.class);
+            startActivity(intent);
+        });
 
         // Chuyển sang Sign Up
-        txtSignUp.setOnClickListener(v ->
-                Toast.makeText(this, "Navigate to Sign Up", Toast.LENGTH_SHORT).show());
+        txtSignUp.setOnClickListener(v -> {
+            Intent intent = new Intent(this, RegisterActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             String email = account.getEmail();
-            String idToken = account.getIdToken();
+            String googleId = account.getId(); // Dùng getId() làm google_id
+            String displayName = account.getDisplayName();
+            String photoUrl = account.getPhotoUrl() != null ? account.getPhotoUrl().toString() : null;
 
-            if (idToken != null) {
-                Log.d(TAG, "🔥 ID Token: " + idToken);
-                Log.e(TAG, "❌ ID Token is null");
-//                saveIdToken(idToken);
-                Toast.makeText(this, "ID Token: " + idToken, Toast.LENGTH_LONG).show();
-            } else {
-                Log.w(TAG, "ID Token is null");
-                Toast.makeText(this, "ID Token is null", Toast.LENGTH_SHORT).show();
-            }
+            Log.d(TAG, "🔥 Google Sign-In: email=" + email + ", googleId=" + googleId + ", displayName=" + displayName + ", photoUrl=" + photoUrl);
 
+            // Gửi dữ liệu tới FastAPI
+            new Thread(() -> {
+                try {
+                    String googleLoginUrl = getString(R.string.base_url) + "/auth/google";
+                    Log.d(TAG, "🔥 Sending POST to " + googleLoginUrl);
+                    URL url = new URL(googleLoginUrl);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setDoOutput(true);
+                    conn.setConnectTimeout(10000);
+                    conn.setReadTimeout(10000);
 
-            Toast.makeText(this, "Signed in with Google: " + email, Toast.LENGTH_SHORT).show();
-//            startActivity(new Intent(this, MainActivity.class));
-//            finish();
+                    JSONObject jsonInput = new JSONObject();
+                    jsonInput.put("google_id", googleId);
+                    jsonInput.put("email", email);
+                    jsonInput.put("display_name", displayName);
+                    jsonInput.put("photo_url", photoUrl);
+                    String jsonString = jsonInput.toString();
+                    Log.d(TAG, "🔥 Request body: " + jsonString);
+
+                    try (OutputStream os = conn.getOutputStream()) {
+                        byte[] input = jsonString.getBytes("utf-8");
+                        os.write(input, 0, input.length);
+                    }
+
+                    int responseCode = conn.getResponseCode();
+                    Log.d(TAG, "🔥 Response code: " + responseCode);
+
+                    InputStream inputStream = (responseCode >= 200 && responseCode < 300)
+                            ? conn.getInputStream()
+                            : conn.getErrorStream();
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    reader.close();
+                    conn.disconnect();
+
+                    String jsonResponse = response.toString();
+                    Log.d(TAG, "🔥 Server response: " + jsonResponse);
+
+                    runOnUiThread(() -> {
+                        if (responseCode >= 200 && responseCode < 300) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(jsonResponse);
+                                User user = new User();
+                                user.setUserId(jsonObject.getInt("user_id"));
+                                user.setFullName(jsonObject.getString("full_name"));
+                                user.setEmail(jsonObject.getString("email"));
+                                user.setPhone(jsonObject.optString("phone", null));
+                                user.setAvatarUrl(jsonObject.optString("avatar_url", null));
+                                user.setGoogleId(jsonObject.optString("google_id", null));
+                                user.setRole(jsonObject.optString("role", null));
+
+                                Toast.makeText(this, "Đăng nhập Google thành công: " + user.getFullName(), Toast.LENGTH_LONG).show();
+//                                Intent intent = new Intent(this, MainActivity.class);
+//                                startActivity(intent);
+//                                finish();
+                            } catch (JSONException e) {
+                                Log.e(TAG, "JSON parse error: ", e);
+                                Toast.makeText(this, "Lỗi phân tích dữ liệu", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            try {
+                                JSONObject errorJson = new JSONObject(jsonResponse);
+                                String errorMessage = errorJson.optString("detail", "Lỗi xác thực Google");
+                                Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+                            } catch (JSONException e) {
+                                Toast.makeText(this, "Lỗi xác thực Google", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "Network error: ", e);
+                    runOnUiThread(() ->
+                            Toast.makeText(this, "Lỗi kết nối: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+            }).start();
+
         } catch (ApiException e) {
             Log.e(TAG, "signInResult:failed code=" + e.getStatusCode(), e);
             Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show();
         }
     }
 
-//    private void saveIdToken(String idToken) {
-//        SharedPreferences prefs = getSharedPreferences("auth", MODE_PRIVATE);
-//        prefs.edit().putString("google_id_token", idToken).apply();
-//    }
 }
