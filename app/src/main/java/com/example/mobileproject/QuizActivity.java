@@ -510,6 +510,9 @@ public class QuizActivity extends AppCompatActivity {
                 Intent intent = new Intent(QuizActivity.this, ResultActivity.class);
                 intent.putExtra("score", score);
                 intent.putExtra("total", quizQuestions.size());
+                if (!quizQuestions.isEmpty()) {
+                    intent.putExtra("question_id", quizQuestions.get(0).questionId);
+                }
                 startActivity(intent);
                 finish();
             } else {

@@ -88,16 +88,38 @@
         android:layout_marginBottom="16dp"/>
 
     <!-- Nút Create Account-->
-    <Button
-        android:id="@+id/register_btn_createaccount"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="Save password"
-        android:textSize="18dp"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:background="@drawable/button"
-        android:layout_marginBottom="16dp"/>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:weightSum="3">
+
+        <!-- Nút Cancel (chiếm 1 phần) -->
+        <Button
+            android:id="@+id/changepassword_btncancel"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textAllCaps="false"
+            android:textSize="18dp"
+            android:textColor="@color/black"
+            android:background="@drawable/button_cancel"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- Nút Save (chiếm 2 phần) -->
+        <Button
+            android:id="@+id/changepassword_btnsave"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="2"
+            android:text="Save"
+            android:textAllCaps="false"
+            android:textSize="18dp"
+            android:textColor="@color/white"
+            android:background="@drawable/button"/>
+    </LinearLayout>
 
 
 

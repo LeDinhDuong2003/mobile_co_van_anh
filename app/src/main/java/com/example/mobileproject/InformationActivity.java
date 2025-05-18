@@ -25,7 +25,8 @@ public class InformationActivity extends AppCompatActivity {
     private static final String TAG = "🔥 quan 🔥";
     private static final int STORAGE_PERMISSION_CODE = 100;
     private static final int PREVIEW_REQUEST_CODE = 101;
-    private ImageView profileAvatar, profileBtnChangeAvatar;
+    private static final int CHANGE_PROFILE_REQUEST_CODE = 102;
+    private ImageView profileAvatar, profileBtnChangeAvatar, profileBtnEdit;
     private TextView profileName;
     private EditText profileEmail, profilePassword, profilePhone;
     private Uri selectedImageUri;
@@ -38,6 +39,7 @@ public class InformationActivity extends AppCompatActivity {
 
         profileAvatar = findViewById(R.id.profile_avatar);
         profileBtnChangeAvatar = findViewById(R.id.profile_btnchangeavatar);
+        profileBtnEdit = findViewById(R.id.profile_btnedit);
         profileName = findViewById(R.id.profile_name);
         profileEmail = findViewById(R.id.profile_email);
         profilePassword = findViewById(R.id.profile_password);
@@ -72,11 +74,18 @@ public class InformationActivity extends AppCompatActivity {
                 openImagePicker();
             }
         });
+
+        profileBtnEdit.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ChangeProfileActivity.class);
+            intent.putExtra("name", profileName.getText().toString());
+            intent.putExtra("email", profileEmail.getText().toString());
+            intent.putExtra("phone", profilePhone.getText().toString());
+            startActivityForResult(intent, CHANGE_PROFILE_REQUEST_CODE);
+        });
     }
 
     private void loadInitialAvatar() {
-        // Hardcoded placeholder image URL
-        String initialAvatarUrl = "https://res.cloudinary.com/diyonw6md/image/upload/v1747536532/user_1.jpg";
+        String initialAvatarUrl = "https://via.placeholder.com/100";
         new Thread(() -> {
             try {
                 Bitmap bitmap = loadBitmapFromUrl(initialAvatarUrl);
@@ -84,7 +93,6 @@ public class InformationActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e(TAG, "🔥 Load initial avatar error: ", e);
                 runOnUiThread(() -> {
-                    // Fallback to default drawable if URL fails
                     profileAvatar.setImageResource(R.drawable.img);
                     Toast.makeText(this, "Không thể tải ảnh đại diện", Toast.LENGTH_SHORT).show();
                 });
@@ -131,6 +139,13 @@ public class InformationActivity extends AppCompatActivity {
             } else {
                 selectedImageUri = null;
             }
+        } else if (requestCode == CHANGE_PROFILE_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            String updatedName = data.getStringExtra("name");
+            String updatedEmail = data.getStringExtra("email");
+            String updatedPhone = data.getStringExtra("phone");
+            profileName.setText(updatedName);
+            profileEmail.setText(updatedEmail);
+            profilePhone.setText(updatedPhone);
         }
     }
 

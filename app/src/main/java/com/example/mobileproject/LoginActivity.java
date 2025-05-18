@@ -40,7 +40,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         // Nếu người dùng đã đăng nhập thì chuyển luôn sang MainActivity
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
@@ -143,10 +142,9 @@ public class LoginActivity extends AppCompatActivity {
                                 user.setAvatarUrl(jsonObject.optString("avatar_url", null));
                                 user.setGoogleId(jsonObject.optString("google_id", null));
                                 user.setRole(jsonObject.optString("role", null));
-
                                 Toast.makeText(this, "Đăng nhập thành công: " + user.getFullName(), Toast.LENGTH_LONG).show();
                                 Log.d(TAG, "🔥 User ID: " + user.getUserId());
-
+                                saveUserToSharedPreferences(user);
 //                                Intent intent = new Intent(this, MainActivity.class);
 //                                startActivity(intent);
 //                                finish();
@@ -193,6 +191,17 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void saveUserToSharedPreferences(User user) {
+        SharedPreferences sharedPreferences = getSharedPreferences("user_info", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("user_id", user.getUserId());
+        editor.putString("full_name", user.getFullName());
+        editor.putString("email", user.getEmail());
+        editor.putString("avatar_url", user.getAvatarUrl());
+        editor.putString("phone", user.getPhone());
+        editor.apply();
+    }
+
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
@@ -200,8 +209,8 @@ public class LoginActivity extends AppCompatActivity {
             String googleId = account.getId(); // Dùng getId() làm google_id
             String displayName = account.getDisplayName();
             String photoUrl = account.getPhotoUrl() != null ? account.getPhotoUrl().toString() : null;
-
-            Log.d(TAG, "🔥 Google Sign-In: email=" + email + ", googleId=" + googleId + ", displayName=" + displayName + ", photoUrl=" + photoUrl);
+            Log.d(TAG, "🔥 Google Sign-In: email=" + email + ", googleId=" +
+                    googleId + ", displayName=" + displayName + ", photoUrl=" + photoUrl);
 
             // Gửi dữ liệu tới FastAPI
             new Thread(() -> {
@@ -261,8 +270,9 @@ public class LoginActivity extends AppCompatActivity {
                                 user.setAvatarUrl(jsonObject.optString("avatar_url", null));
                                 user.setGoogleId(jsonObject.optString("google_id", null));
                                 user.setRole(jsonObject.optString("role", null));
-
-                                Toast.makeText(this, "Đăng nhập Google thành công: " + user.getFullName(), Toast.LENGTH_LONG).show();
+                                Toast.makeText(this, "Đăng nhập Google thành công: " +
+                                        user.getFullName(), Toast.LENGTH_LONG).show();
+                                saveUserToSharedPreferences(user);
 //                                Intent intent = new Intent(this, MainActivity.class);
 //                                startActivity(intent);
 //                                finish();
