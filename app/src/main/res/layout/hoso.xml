@@ -59,13 +59,13 @@
         <!-- Text "Information" -->
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Information"
-            android:textSize="25dp"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
+            android:layout_height="22dp"
             android:layout_weight="1"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:text="Information"
+            android:textColor="@android:color/white"
+            android:textSize="25dp"
+            android:textStyle="bold" />
 
         <!-- Icon bút -->
         <ImageView
