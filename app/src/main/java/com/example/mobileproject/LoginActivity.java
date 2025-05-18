@@ -145,9 +145,9 @@ public class LoginActivity extends AppCompatActivity {
                                 Toast.makeText(this, "Đăng nhập thành công: " + user.getFullName(), Toast.LENGTH_LONG).show();
                                 Log.d(TAG, "🔥 User ID: " + user.getUserId());
                                 saveUserToSharedPreferences(user);
-//                                Intent intent = new Intent(this, MainActivity.class);
-//                                startActivity(intent);
-//                                finish();
+                                Intent intent = new Intent(this, MainActivityHomePage.class);
+                                startActivity(intent);
+                                finish();
                             } catch (JSONException e) {
                                 Log.e(TAG, "JSON parse error: ", e);
                                 Toast.makeText(this, "Lỗi phân tích dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT).show();

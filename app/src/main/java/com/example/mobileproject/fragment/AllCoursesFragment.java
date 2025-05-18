@@ -253,7 +253,7 @@ public class AllCoursesFragment extends Fragment implements CategoryAdapter.OnCa
 
     private void fetchCourses() {
         // Sử dụng API thống nhất với các tham số tùy chọn
-        RetrofitClient.getApiService().getCourses(currentPage, PAGE_SIZE, selectedCategory, searchQuery)
+        RetrofitClient.getClient().getCourses(currentPage, PAGE_SIZE, selectedCategory, searchQuery)
                 .enqueue(new Callback<PagedResponse<CourseResponse>>() {
                     @Override
                     public void onResponse(Call<PagedResponse<CourseResponse>> call, Response<PagedResponse<CourseResponse>> response) {

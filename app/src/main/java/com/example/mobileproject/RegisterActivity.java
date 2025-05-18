@@ -119,7 +119,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 user.setRole(jsonObject.optString("role", null));
 
                                 Toast.makeText(this, "Đăng ký thành công: " + user.getFullName(), Toast.LENGTH_LONG).show();
-                                Intent intent = new Intent(this, MainActivity.class);
+                                Intent intent = new Intent(this, MainActivityHomePage.class);
                                 startActivity(intent);
                                 finish();
                             } catch (JSONException e) {

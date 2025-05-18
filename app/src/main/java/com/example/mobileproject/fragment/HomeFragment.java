@@ -161,7 +161,7 @@ public class HomeFragment extends Fragment {
         // progressBar.setVisibility(View.VISIBLE);
 
         // Gọi API để lấy top courses
-        RetrofitClient.getApiService().getTopCourses().enqueue(new Callback<List<CourseResponse>>() {
+        RetrofitClient.getClient().getTopCourses().enqueue(new Callback<List<CourseResponse>>() {
             @Override
             public void onResponse(Call<List<CourseResponse>> call, Response<List<CourseResponse>> response) {
                 // Ẩn loading indicator
