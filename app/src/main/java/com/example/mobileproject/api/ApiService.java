@@ -3,7 +3,9 @@ package com.example.mobileproject.api;
 
 import com.example.mobileproject.model.Comment;
 import com.example.mobileproject.model.Course;
+import com.example.mobileproject.model.CourseResponse;
 import com.example.mobileproject.model.Lesson;
+import com.example.mobileproject.model.PagedResponse;
 import com.example.mobileproject.model.Review;
 
 import java.util.List;
@@ -13,6 +15,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
     @GET("courses/{id}")
