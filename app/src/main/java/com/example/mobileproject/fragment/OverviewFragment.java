@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/mobileproject/fragment/OverviewFragment.java
 package com.example.mobileproject.fragment;
 
 import android.os.Bundle;
@@ -7,13 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.mobileproject.R;
 import androidx.fragment.app.Fragment;
 
+import com.example.mobileproject.R;
 import com.example.mobileproject.model.Course;
 
 public class OverviewFragment extends Fragment {
-
+    private static final String TAG = "OverviewFragment";
     private Course course;
 
     public static OverviewFragment newInstance(Course course) {
@@ -40,7 +39,8 @@ public class OverviewFragment extends Fragment {
         TextView seeMoreButton = view.findViewById(R.id.seeMoreButton);
 
         if (introductionText != null) {
-            introductionText.setText(course != null && course.getDescription() != null ? course.getDescription() : "No description available");
+            introductionText.setText(course != null && course.getDescription() != null
+                    ? course.getDescription() : "No description available");
         }
         if (seeMoreButton != null) {
             seeMoreButton.setOnClickListener(v -> {

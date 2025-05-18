@@ -1,5 +1,7 @@
 package com.example.mobileproject.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.w3c.dom.Comment;
 
 import java.io.Serializable;
@@ -9,15 +11,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class User implements Serializable {
+    @SerializedName("user_id")
     private Integer userId;
+    @SerializedName("username")
     private String username;
+    @SerializedName("full_name")
     private String fullName;
+    @SerializedName("password")
     private String password;
+    @SerializedName("email")
     private String email;
+    @SerializedName("phone")
     private String phone;
+    @SerializedName("avatar_url")
     private String avatarUrl;
+    @SerializedName("google_id")
     private String googleId;
+    @SerializedName("role")
     private String role;
+    @SerializedName("created_at")
     private LocalDateTime createdAt;
     private List<Wishlist> wishlists = new ArrayList<>();
     private List<Enrollment> enrollments = new ArrayList<>();

@@ -1,14 +1,16 @@
-// app/src/main/java/com/example/mobileproject/VideoPlayerActivity.java
 package com.example.mobileproject;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -86,7 +88,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
             finish();
             return;
         }
-        lessonRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        lessonRecyclerView.setVisibility(View.GONE); // Ẩn RecyclerView ban đầu
 
         checkEnrollmentStatus();
         fetchLessonData();
@@ -114,7 +116,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 } else {
                     isEnrolled = false;
                     setupButtons();
-                    Toast.makeText(VideoPlayerActivity.this, "Failed to check enrollment status", Toast.LENGTH_SHORT).show();
+                    showErrorDialog("Failed to check enrollment status. Please try again.");
                 }
             }
 
@@ -123,7 +125,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 Log.e("VideoPlayerActivity", "Error checking enrollment", t);
                 isEnrolled = false;
                 setupButtons();
-                Toast.makeText(VideoPlayerActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                showErrorDialog("Error: " + t.getMessage() + ". Please try again.");
             }
         });
     }
@@ -152,11 +154,19 @@ public class VideoPlayerActivity extends AppCompatActivity {
     }
 
     private void fetchLessonData() {
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
         ApiService apiService = RetrofitClient.getClient();
         Call<Lesson> call = apiService.getLessonById(lessonId);
         call.enqueue(new Callback<Lesson>() {
             @Override
             public void onResponse(Call<Lesson> call, Response<Lesson> response) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
                 if (response.isSuccessful() && response.body() != null) {
                     Lesson lesson = response.body();
                     videoUrl = lesson.getVideoUrl();
@@ -172,63 +182,96 @@ public class VideoPlayerActivity extends AppCompatActivity {
                             });
                         } catch (Exception e) {
                             Log.e("VideoPlayerActivity", "Error setting video URI", e);
-                            Toast.makeText(VideoPlayerActivity.this, "Invalid video URL", Toast.LENGTH_SHORT).show();
-                            finish();
+                            showErrorDialog("Invalid video URL. Please try again.");
                         }
                     } else {
-                        Toast.makeText(VideoPlayerActivity.this, "No video URL available", Toast.LENGTH_SHORT).show();
-                        finish();
+                        showErrorDialog("No video URL available. Please try again.");
                     }
                 } else {
-                    Toast.makeText(VideoPlayerActivity.this, "Failed to load lesson data", Toast.LENGTH_SHORT).show();
-                    finish();
+                    showErrorDialog("Failed to load lesson data. Please try again.");
                 }
             }
 
             @Override
             public void onFailure(Call<Lesson> call, Throwable t) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
                 Log.e("VideoPlayerActivity", "Error fetching lesson data", t);
-                Toast.makeText(VideoPlayerActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                finish();
+                showErrorDialog("Error: " + t.getMessage() + ". Please try again.");
             }
         });
     }
 
     private void fetchLessonsForCourse() {
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
         ApiService apiService = RetrofitClient.getClient();
         Call<List<Lesson>> call = apiService.getLessonsByCourseId(courseId);
         call.enqueue(new Callback<List<Lesson>>() {
             @Override
             public void onResponse(Call<List<Lesson>> call, Response<List<Lesson>> response) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
                 if (response.isSuccessful() && response.body() != null) {
                     lessons.clear();
                     lessons.addAll(response.body());
-                    LessonAdapter adapter = new LessonAdapter(lessons, LessonAdapter.TYPE_PAGE_2, lesson -> {
-                        lessonId = lesson.getLessonId();
-                        videoUrl = lesson.getVideoUrl();
-                        if (videoUrl != null && !videoUrl.isEmpty()) {
-                            try {
-                                VideoView videoView = findViewById(R.id.videoView);
-                                videoView.setVideoURI(Uri.parse(videoUrl));
-                                videoView.start();
-                            } catch (Exception e) {
-                                Toast.makeText(VideoPlayerActivity.this, "Error switching video", Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Toast.makeText(VideoPlayerActivity.this, "No video available", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    lessonRecyclerView.setAdapter(adapter);
+                    setupLessonRecyclerView();
                 } else {
-                    Toast.makeText(VideoPlayerActivity.this, "Failed to load lessons", Toast.LENGTH_SHORT).show();
+                    showErrorDialog("Failed to load lessons. Please try again.");
                 }
             }
 
             @Override
             public void onFailure(Call<List<Lesson>> call, Throwable t) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
                 Log.e("VideoPlayerActivity", "Error fetching lessons", t);
-                Toast.makeText(VideoPlayerActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                showErrorDialog("Error: " + t.getMessage() + ". Please try again.");
             }
         });
+    }
+
+    private void setupLessonRecyclerView() {
+        lessonRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        LessonAdapter adapter = new LessonAdapter(lessons, LessonAdapter.TYPE_PAGE_2, lesson -> {
+            lessonId = lesson.getLessonId();
+            videoUrl = lesson.getVideoUrl();
+            if (videoUrl != null && !videoUrl.isEmpty()) {
+                try {
+                    VideoView videoView = findViewById(R.id.videoView);
+                    videoView.setVideoURI(Uri.parse(videoUrl));
+                    videoView.start();
+                } catch (Exception e) {
+                    Toast.makeText(VideoPlayerActivity.this, "Error switching video", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(VideoPlayerActivity.this, "No video available", Toast.LENGTH_SHORT).show();
+            }
+        });
+        lessonRecyclerView.setAdapter(adapter);
+        lessonRecyclerView.setVisibility(View.VISIBLE); // Hiển thị sau khi gán adapter
+    }
+
+    private void showErrorDialog(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Error")
+                .setMessage(message)
+                .setPositiveButton("Retry", (dialog, which) -> {
+                    if (message.contains("lesson data")) {
+                        fetchLessonData();
+                    } else if (message.contains("lessons")) {
+                        fetchLessonsForCourse();
+                    } else {
+                        checkEnrollmentStatus();
+                    }
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> finish())
+                .show();
     }
 }

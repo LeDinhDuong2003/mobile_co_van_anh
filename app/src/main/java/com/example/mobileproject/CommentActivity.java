@@ -1,11 +1,13 @@
-// app/src/main/java/com/example/mobileproject/CommentActivity.java
 package com.example.mobileproject;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,9 +58,7 @@ public class CommentActivity extends AppCompatActivity {
 
         RecyclerView commentsRecyclerView = findViewById(R.id.recycler_comments);
         if (commentsRecyclerView != null) {
-            commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            adapter = new CommentAdapter(comments);
-            commentsRecyclerView.setAdapter(adapter);
+            commentsRecyclerView.setVisibility(View.GONE); // Ẩn RecyclerView ban đầu
         }
 
         EditText commentInput = findViewById(R.id.input_comment);
@@ -90,31 +90,50 @@ public class CommentActivity extends AppCompatActivity {
     }
 
     private void fetchComments() {
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
         ApiService apiService = RetrofitClient.getClient();
         Call<List<Comment>> call = apiService.getCommentsByLessonId(lessonId);
         call.enqueue(new Callback<List<Comment>>() {
             @Override
             public void onResponse(Call<List<Comment>> call, Response<List<Comment>> response) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
                 if (response.isSuccessful() && response.body() != null) {
                     comments.clear();
                     comments.addAll(response.body());
-                    if (adapter != null) {
-                        adapter.notifyDataSetChanged();
-                    }
+                    setupCommentsRecyclerView();
                     if (repliesCount != null) {
                         repliesCount.setText(comments.size() + " Replies");
                     }
                 } else {
-                    Toast.makeText(CommentActivity.this, "Failed to load comments", Toast.LENGTH_SHORT).show();
+                    showErrorDialog("Failed to load comments. Please try again.");
                 }
             }
 
             @Override
             public void onFailure(Call<List<Comment>> call, Throwable t) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
                 Log.e("CommentActivity", "Error fetching comments", t);
-                Toast.makeText(CommentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                showErrorDialog("Error: " + t.getMessage() + ". Please try again.");
             }
         });
+    }
+
+    private void setupCommentsRecyclerView() {
+        RecyclerView commentsRecyclerView = findViewById(R.id.recycler_comments);
+        if (commentsRecyclerView != null) {
+            adapter = new CommentAdapter(comments);
+            commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            commentsRecyclerView.setAdapter(adapter);
+            commentsRecyclerView.setVisibility(View.VISIBLE); // Hiển thị sau khi gán adapter
+        }
     }
 
     private void addCommentToServer(Comment comment) {
@@ -147,5 +166,14 @@ public class CommentActivity extends AppCompatActivity {
                 Toast.makeText(CommentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void showErrorDialog(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Error")
+                .setMessage(message)
+                .setPositiveButton("Retry", (dialog, which) -> fetchComments())
+                .setNegativeButton("Cancel", (dialog, which) -> finish())
+                .show();
     }
 }

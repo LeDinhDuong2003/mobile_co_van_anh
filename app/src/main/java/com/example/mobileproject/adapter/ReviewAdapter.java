@@ -1,6 +1,6 @@
-// app/src/main/java/com/example/mobileproject/adapter/ReviewAdapter.java
 package com.example.mobileproject.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,13 +14,22 @@ import com.example.mobileproject.R;
 import com.example.mobileproject.model.Review;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder> {
+    private static final String TAG = "ReviewAdapter";
     private List<Review> reviews;
 
     public ReviewAdapter(List<Review> reviews) {
-        this.reviews = reviews;
+        this.reviews = reviews != null ? reviews : new ArrayList<>();
+        Log.d(TAG, "ReviewAdapter initialized with " + this.reviews.size() + " reviews");
+    }
+
+    public void setData(List<Review> reviews) {
+        this.reviews = reviews != null ? reviews : new ArrayList<>();
+        Log.d(TAG, "setData called with " + this.reviews.size() + " reviews");
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -32,9 +41,11 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Log.d(TAG, "Binding review at position: " + position);
         Review review = reviews.get(position);
         if (holder.username != null) {
-            holder.username.setText(review.getUser() != null ? review.getUser().getFullName() : "Anonymous");
+            holder.username.setText(review.getUser() != null && review.getUser().getFullName() != null
+                    ? review.getUser().getFullName() : "Anonymous");
         }
         if (holder.ratingBar != null) {
             holder.ratingBar.setRating(review.getRating() != null ? review.getRating() : 0);
@@ -43,14 +54,16 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
             holder.comment.setText(review.getComment() != null ? review.getComment() : "");
         }
         if (holder.time != null) {
-            holder.time.setText(review.getCreatedAt() != null ?
-                    review.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "");
+            holder.time.setText(review.getCreatedAt() != null
+                    ? review.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "");
         }
     }
 
     @Override
     public int getItemCount() {
-        return reviews != null ? reviews.size() : 0;
+        int size = reviews.size();
+        Log.d(TAG, "getItemCount: " + size);
+        return size;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

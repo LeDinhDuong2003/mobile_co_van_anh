@@ -1,11 +1,13 @@
-// app/src/main/java/com/example/mobileproject/CourseDetailActivity.java
 package com.example.mobileproject;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,9 +36,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CourseDetailActivity extends AppCompatActivity {
+    private static final String TAG = "CourseDetailActivity";
     private int courseId;
     private Course course;
+    private List<Lesson> lessons;
+    private List<Review> reviews;
     private boolean isEnrolled;
+    private ReviewAdapter reviewAdapter;
+    private int apiCallsCompleted = 0;
+    private static final int TOTAL_API_CALLS = 4; // checkEnrollment, getCourseById, getLessons, getReviews
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,20 +58,33 @@ public class CourseDetailActivity extends AppCompatActivity {
             return;
         }
 
+        RecyclerView reviewsRecyclerView = findViewById(R.id.reviewsRecyclerView);
+        if (reviewsRecyclerView != null) {
+            reviewsRecyclerView.setVisibility(View.GONE);
+            Log.d(TAG, "reviewsRecyclerView initialized and set to GONE");
+        } else {
+            Log.e(TAG, "reviewsRecyclerView not found in layout");
+        }
+
         ImageView backButton = findViewById(R.id.back_button);
         if (backButton != null) {
             backButton.setOnClickListener(v -> finish());
         }
 
+        lessons = new ArrayList<>();
+        reviews = new ArrayList<>();
         checkEnrollmentStatus();
         fetchCourseData();
+        fetchLessons();
+        fetchReviews();
     }
 
     private void checkEnrollmentStatus() {
         Integer userId = MockAuthManager.getInstance().getCurrentUserId();
         if (userId == null) {
             isEnrolled = false;
-            setupUI();
+            apiCallsCompleted++;
+            trySetupUI();
             Toast.makeText(this, "User data not available", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -75,25 +96,32 @@ public class CourseDetailActivity extends AppCompatActivity {
             public void onResponse(Call<Boolean> call, Response<Boolean> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     isEnrolled = response.body();
-                    setupUI();
                 } else {
                     isEnrolled = false;
-                    setupUI();
-                    Toast.makeText(CourseDetailActivity.this, "Failed to check enrollment status", Toast.LENGTH_SHORT).show();
+                    showErrorDialog("Failed to check enrollment status. Please try again.");
                 }
+                apiCallsCompleted++;
+                trySetupUI();
             }
 
             @Override
             public void onFailure(Call<Boolean> call, Throwable t) {
-                Log.e("CourseDetailActivity", "Error checking enrollment", t);
+                Log.e(TAG, "Error checking enrollment", t);
                 isEnrolled = false;
-                setupUI();
-                Toast.makeText(CourseDetailActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                apiCallsCompleted++;
+                trySetupUI();
+                showErrorDialog("Error: " + t.getMessage() + ". Please try again.");
             }
         });
     }
 
     private void fetchCourseData() {
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+            Log.d(TAG, "ProgressBar set to VISIBLE");
+        }
+
         ApiService apiService = RetrofitClient.getClient();
         Call<Course> call = apiService.getCourseById(courseId);
         call.enqueue(new Callback<Course>() {
@@ -101,27 +129,112 @@ public class CourseDetailActivity extends AppCompatActivity {
             public void onResponse(Call<Course> call, Response<Course> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     course = response.body();
-                    setupUI();
+                    Log.d(TAG, "Course fetched: " + course.getTitle());
                 } else {
-                    Toast.makeText(CourseDetailActivity.this, "Failed to load course data", Toast.LENGTH_SHORT).show();
-                    finish();
+                    Log.w(TAG, "Course fetch failed: " + response.code());
+                    showErrorDialog("Failed to load course data. Please try again.");
                 }
+                apiCallsCompleted++;
+                trySetupUI();
             }
 
             @Override
             public void onFailure(Call<Course> call, Throwable t) {
-                Log.e("CourseDetailActivity", "Error fetching course data", t);
-                Toast.makeText(CourseDetailActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                finish();
+                Log.e(TAG, "Error fetching course data", t);
+                apiCallsCompleted++;
+                trySetupUI();
+                showErrorDialog("Error: " + t.getMessage() + ". Please try again.");
             }
         });
     }
 
-    private void setupUI() {
-        if (course == null) {
+    private void fetchLessons() {
+        ApiService apiService = RetrofitClient.getClient();
+        Call<List<Lesson>> call = apiService.getLessonsByCourseId(courseId);
+        call.enqueue(new Callback<List<Lesson>>() {
+            @Override
+            public void onResponse(Call<List<Lesson>> call, Response<List<Lesson>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    lessons = response.body();
+                    Log.d(TAG, "Lessons fetched: " + lessons.size());
+                } else {
+                    Log.w(TAG, "Lessons fetch failed: " + response.code());
+                    lessons = new ArrayList<>();
+                }
+                apiCallsCompleted++;
+                trySetupUI();
+            }
+
+            @Override
+            public void onFailure(Call<List<Lesson>> call, Throwable t) {
+                Log.e(TAG, "Error fetching lessons", t);
+                lessons = new ArrayList<>();
+                apiCallsCompleted++;
+                trySetupUI();
+            }
+        });
+    }
+
+    private void fetchReviews() {
+        ApiService apiService = RetrofitClient.getClient();
+        Call<List<Review>> call = apiService.getReviewsByCourseId(courseId);
+        call.enqueue(new Callback<List<Review>>() {
+            @Override
+            public void onResponse(Call<List<Review>> call, Response<List<Review>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    reviews = response.body();
+                    Log.d(TAG, "Reviews fetched: " + reviews.size());
+                } else {
+                    Log.w(TAG, "Reviews fetch failed: " + response.code());
+                    reviews = new ArrayList<>();
+                }
+                apiCallsCompleted++;
+                trySetupUI();
+            }
+
+            @Override
+            public void onFailure(Call<List<Review>> call, Throwable t) {
+                Log.e(TAG, "Error fetching reviews", t);
+                reviews = new ArrayList<>();
+                apiCallsCompleted++;
+                trySetupUI();
+            }
+        });
+    }
+
+    private void trySetupUI() {
+        if (apiCallsCompleted >= TOTAL_API_CALLS) {
+            ProgressBar progressBar = findViewById(R.id.progressBar);
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+                Log.d(TAG, "ProgressBar set to GONE");
+            }
+            if (course == null) {
+                Log.e(TAG, "Course is null after API calls, cannot setup UI");
+                showErrorDialog("Course data not available. Please try again.");
+                return;
+            }
+            setupUI();
+            setupReviewsRecyclerView();
+        }
+    }
+
+    private void setupReviewsRecyclerView() {
+        RecyclerView reviewsRecyclerView = findViewById(R.id.reviewsRecyclerView);
+        if (reviewsRecyclerView == null) {
+            Log.e(TAG, "reviewsRecyclerView is null in setupReviewsRecyclerView");
             return;
         }
 
+        reviewAdapter = new ReviewAdapter(reviews);
+        reviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        reviewsRecyclerView.setAdapter(reviewAdapter);
+        reviewsRecyclerView.setVisibility(View.VISIBLE);
+        reviewAdapter.notifyDataSetChanged();
+        Log.d(TAG, "reviewsRecyclerView adapter set with " + reviews.size() + " reviews and set to VISIBLE");
+    }
+
+    private void setupUI() {
         ImageView headerImage = findViewById(R.id.header_image);
         ImageView instructorImage = findViewById(R.id.instructor_image);
         TextView instructorName = findViewById(R.id.instructor_name);
@@ -139,20 +252,20 @@ public class CourseDetailActivity extends AppCompatActivity {
             instructorImage.setImageResource(R.drawable.teacher);
         }
         if (instructorName != null) {
-            instructorName.setText(course.getInstructor() != null ? course.getInstructor().getFullName() : "Unknown");
+            instructorName.setText(course.getInstructor() != null && course.getInstructor().getFullName() != null
+                    ? course.getInstructor().getFullName() : "Unknown");
         }
         if (courseTitle != null) {
             courseTitle.setText(course.getTitle() != null ? course.getTitle() : "No Title");
         }
         if (courseDuration != null) {
-            courseDuration.setText(formatDuration(course.getLessons()));
+            courseDuration.setText(formatDuration(lessons));
         }
         if (lessonCount != null) {
-            lessonCount.setText((course.getLessons() != null ? course.getLessons().size() : 0) + " Lessons");
+            lessonCount.setText(lessons.size() + " Lessons");
         }
         if (courseRating != null) {
-            courseRating.setText(String.format("%.1f (%d)", calculateAverageRating(course.getReviews()),
-                    course.getReviews() != null ? course.getReviews().size() : 0));
+            courseRating.setText(String.format("%.1f (%d)", calculateAverageRating(reviews), reviews.size()));
         }
         if (studentCount != null) {
             studentCount.setText((course.getUsers() != null ? course.getUsers().size() : 0) + " students");
@@ -163,23 +276,17 @@ public class CourseDetailActivity extends AppCompatActivity {
 
         TabLayout tabLayout = findViewById(R.id.tab_layout);
         ViewPager2 viewPager = findViewById(R.id.view_pager);
-
         if (tabLayout != null && viewPager != null) {
             List<String> tabTitles = new ArrayList<>();
             tabTitles.add("Overview");
             tabTitles.add("Lessons");
 
-            TabPagerAdapter adapter = new TabPagerAdapter(this, course);
+            TabPagerAdapter adapter = new TabPagerAdapter(this, course, lessons, reviews);
             viewPager.setAdapter(adapter);
-
             new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText(tabTitles.get(position))).attach();
-        }
-
-        RecyclerView reviewsRecyclerView = findViewById(R.id.reviewsRecyclerView);
-        if (reviewsRecyclerView != null) {
-            reviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            ReviewAdapter reviewAdapter = new ReviewAdapter(course.getReviews() != null ? course.getReviews() : new ArrayList<>());
-            reviewsRecyclerView.setAdapter(reviewAdapter);
+            Log.d(TAG, "TabPagerAdapter set for ViewPager with course: " + course.getTitle());
+        } else {
+            Log.e(TAG, "TabLayout or ViewPager is null");
         }
 
         RatingBar ratingBar = findViewById(R.id.ratingBar);
@@ -207,7 +314,7 @@ public class CourseDetailActivity extends AppCompatActivity {
                     newReview.setUserId(userId);
                     newReview.setCreatedAt(LocalDateTime.now());
                     newReview.setUser(MockAuthManager.getInstance().getCurrentUser());
-                    addReviewToServer(newReview, reviewsRecyclerView != null ? (ReviewAdapter) reviewsRecyclerView.getAdapter() : null);
+                    addReviewToServer(newReview);
                 } else {
                     Toast.makeText(this, "Please provide a rating and comment", Toast.LENGTH_SHORT).show();
                 }
@@ -215,51 +322,62 @@ public class CourseDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void addReviewToServer(Review review, ReviewAdapter adapter) {
-        ApiService apiService = RetrofitClient.getClient();
-        Call<Review> call = apiService.addReview(review);
-        call.enqueue(new Callback<Review>() {
-            @Override
-            public void onResponse(Call<Review> call, Response<Review> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    if (course.getReviews() == null) {
-                        course.setReviews(new ArrayList<>());
-                    }
-                    course.getReviews().add(response.body());
-                    for(Review r: course.getReviews()){
-                        System.out.println(r.getReviewId());
-                    }
-                    if (adapter != null) {
-                        adapter.notifyItemInserted(course.getReviews().size() - 1);
-                    }
-                    EditText reviewCommentInput = findViewById(R.id.reviewCommentInput);
-                    RatingBar ratingBar = findViewById(R.id.ratingBar);
-                    if (reviewCommentInput != null) {
-                        reviewCommentInput.setText("");
-                    }
-                    if (ratingBar != null) {
-                        ratingBar.setRating(0);
-                    }
-                    Toast.makeText(CourseDetailActivity.this, "Review submitted", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(CourseDetailActivity.this, "Failed to submit review", Toast.LENGTH_SHORT).show();
-                }
-            }
+    private void addReviewToServer(Review review) {
+//        ApiService apiService = RetrofitClient.getClient();
+//        Call<Review> call = apiService.addReview(review);
+//        call.enqueue(new Callback<Review>() {
+//            @Override
+//            public void onResponse(Call<Review> call, Response<Review> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    reviews.add(response.body());
+//                    if (reviewAdapter != null) {
+//                        reviewAdapter.setData(reviews);
+//                        reviewAdapter.notifyItemInserted(reviews.size() - 1);
+//                        Log.d(TAG, "New review added and adapter notified");
+//                    } else {
+//                        Log.w(TAG, "reviewAdapter is null when adding review");
+//                    }
+//                    EditText reviewCommentInput = findViewById(R.id.reviewCommentInput);
+//                    RatingBar ratingBar = findViewById(R.id.ratingBar);
+//                    if (reviewCommentInput != null) {
+//                        reviewCommentInput.setText("");
+//                    }
+//                    if (ratingBar != null) {
+//                        ratingBar.setRating(0);
+//                    }
+//                    Toast.makeText(CourseDetailActivity.this, "Review submitted", Toast.LENGTH_SHORT).show();
+//                } else {
+//                    Toast.makeText(CourseDetailActivity.this, "Failed to submit review", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Review> call, Throwable t) {
+//                Log.e(TAG, "Error adding review", t);
+//                Toast.makeText(CourseDetailActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
+    }
 
-            @Override
-            public void onFailure(Call<Review> call, Throwable t) {
-                Log.e("CourseDetailActivity", "Error adding review", t);
-                Toast.makeText(CourseDetailActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void showErrorDialog(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Error")
+                .setMessage(message)
+                .setPositiveButton("Retry", (dialog, which) -> {
+                    apiCallsCompleted = 0;
+                    checkEnrollmentStatus();
+                    fetchCourseData();
+                    fetchLessons();
+                    fetchReviews();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> finish())
+                .show();
     }
 
     private String formatDuration(List<Lesson> lessons) {
         int totalSeconds = 0;
-        if (lessons != null) {
-            for (Lesson lesson : lessons) {
-                totalSeconds += lesson.getDuration() != null ? lesson.getDuration() : 0;
-            }
+        for (Lesson lesson : lessons) {
+            totalSeconds += lesson.getDuration() != null ? lesson.getDuration() : 0;
         }
         int minutes = totalSeconds / 60;
         int seconds = totalSeconds % 60;
@@ -267,7 +385,7 @@ public class CourseDetailActivity extends AppCompatActivity {
     }
 
     private float calculateAverageRating(List<Review> reviews) {
-        if (reviews == null || reviews.isEmpty()) return 0.0f;
+        if (reviews.isEmpty()) return 0.0f;
         float sum = 0;
         for (Review review : reviews) {
             sum += review.getRating() != null ? review.getRating() : 0;

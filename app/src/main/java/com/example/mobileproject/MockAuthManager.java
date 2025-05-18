@@ -9,7 +9,7 @@ public class MockAuthManager {
     private User currentUser;
 
     private MockAuthManager() {
-        setMockUser(1, "John Doe", "Student");
+        setMockUser(2, "John Doe", "Student");
     }
 
     public static MockAuthManager getInstance() {

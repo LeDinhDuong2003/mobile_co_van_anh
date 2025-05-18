@@ -1,6 +1,6 @@
-// app/src/main/java/com/example/mobileproject/adapter/LessonAdapter.java
 package com.example.mobileproject.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.mobileproject.R;
 import com.example.mobileproject.model.Lesson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LessonAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private static final String TAG = "LessonAdapter";
     private List<Lesson> lessons;
     public static final int TYPE_PAGE_1 = 1;
     public static final int TYPE_PAGE_2 = 2;
@@ -27,9 +29,10 @@ public class LessonAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     public LessonAdapter(List<Lesson> lessons, int layoutType, OnLessonClickListener listener) {
-        this.lessons = lessons;
+        this.lessons = lessons != null ? lessons : new ArrayList<>();
         this.layoutType = layoutType;
         this.listener = listener;
+        Log.d(TAG, "LessonAdapter initialized with " + this.lessons.size() + " lessons");
     }
 
     @Override
@@ -51,6 +54,7 @@ public class LessonAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        Log.d(TAG, "Binding lesson at position: " + position);
         Lesson lesson = lessons.get(position);
         if (holder instanceof LessonViewHolderPage1) {
             LessonViewHolderPage1 page1Holder = (LessonViewHolderPage1) holder;
@@ -84,7 +88,9 @@ public class LessonAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public int getItemCount() {
-        return lessons != null ? lessons.size() : 0;
+        int size = lessons.size();
+        Log.d(TAG, "getItemCount: " + size);
+        return size;
     }
 
     private String formatDuration(Integer seconds) {

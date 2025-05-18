@@ -1,5 +1,7 @@
 package com.example.mobileproject.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -7,13 +9,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Course implements Serializable {
+    @SerializedName("course_id")
     private Integer courseId;
+    @SerializedName("owner_id")
     private Integer ownerId;
+    @SerializedName("title")
     private String title;
+    @SerializedName("description")
     private String description;
+    @SerializedName("thumbnail_url")
     private String thumbnailUrl;
+    @SerializedName("created_at")
     private LocalDateTime createdAt;
+    @SerializedName("price")
     private Float price;
+    @SerializedName("instructor")
     private User instructor;
     private List<Wishlist> wishlists;
     private List<Enrollment> enrollments;

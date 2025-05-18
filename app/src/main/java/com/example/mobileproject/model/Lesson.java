@@ -1,16 +1,24 @@
 package com.example.mobileproject.model;
 
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Lesson implements Serializable {
+    @SerializedName("lesson_id")
     private Integer lessonId;
+    @SerializedName("course_id")
     private Integer courseId;
+    @SerializedName("title")
     private String title;
+    @SerializedName("video_url")
     private String videoUrl;
+    @SerializedName("duration")
     private Integer duration;
+    @SerializedName("position")
     private Integer position;
     private Course course;
     private List<Comment> comments = new ArrayList<>();

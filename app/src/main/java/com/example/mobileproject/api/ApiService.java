@@ -24,14 +24,17 @@ public interface ApiService {
     @GET("courses/{courseId}/lessons")
     Call<List<Lesson>> getLessonsByCourseId(@Path("courseId") int courseId);
 
+    @GET("courses/{courseId}/reviews")
+    Call<List<Review>> getReviewsByCourseId(@Path("courseId") int courseId);
+
     @GET("lessons/{lessonId}/comments")
     Call<List<Comment>> getCommentsByLessonId(@Path("lessonId") int lessonId);
 
-    @POST("reviews")
-    Call<Review> addReview(@Body Review review);
+    @POST("courses/{courseId}/reviews")
+    Call<Review> addReview(@Path("courseId") int courseId, @Body Review review);
 
-    @POST("comments")
-    Call<Comment> addComment(@Body Comment comment);
+    @POST("lessons/{lessonId}/comments")
+    Call<Comment> addComment(@Path("lessonId") int lessonId, @Body Comment comment);
 
     @GET("courses/{courseId}/users/{userId}/enrollment")
     Call<Boolean> checkEnrollment(@Path("courseId") int courseId, @Path("userId") int userId);
