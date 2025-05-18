@@ -38,4 +38,19 @@ public interface ApiService {
 
     @GET("courses/{courseId}/users/{userId}/enrollment")
     Call<Boolean> checkEnrollment(@Path("courseId") int courseId, @Path("userId") int userId);
+
+    @GET("api/courses/top")
+    Call<List<CourseResponse>> getTopCourses();
+
+    // Lấy chi tiết một khóa học
+    @GET("api/courses/{course_id}")
+    Call<CourseResponse> getCourseById(@Path("course_id") String courseId);
+
+    // API chung: lấy danh sách khóa học, có thể tìm kiếm, lọc theo danh mục và phân trang
+    @GET("api/courses")
+    Call<PagedResponse<CourseResponse>> getCourses(
+            @Query("page") int page,
+            @Query("page_size") int pageSize,
+            @Query("category") String category,
+            @Query("query") String query);
 }
