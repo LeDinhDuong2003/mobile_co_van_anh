@@ -2,8 +2,8 @@ package com.example.mobileproject.repository;
 
 import com.example.mobileproject.R;
 import com.example.mobileproject.model.Category;
-import com.example.mobileproject.model.Course;
-import com.example.mobileproject.model.User;
+import com.example.mobileproject.model.CourseList;
+import com.example.mobileproject.model.UserMain;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +23,11 @@ public class DataRepository {
     }
 
     // Lấy tất cả khóa học (mở rộng với nhiều khóa học hơn và thêm category)
-    public static List<Course> getAllCourses() {
-        List<Course> courses = new ArrayList<>();
+    public static List<CourseList> getAllCourses() {
+        List<CourseList> courses = new ArrayList<>();
 
         // Design courses
-        courses.add(new Course(
+        courses.add(new CourseList(
                 "d1",
                 "Coding with Python Interface",
                 "Stephen Morris",
@@ -38,7 +38,7 @@ public class DataRepository {
                 "Design"
         ));
 
-        courses.add(new Course(
+        courses.add(new CourseList(
                 "d2",
                 "Design with the Environment",
                 "Stephen Morris",
@@ -55,11 +55,11 @@ public class DataRepository {
     }
 
     // Lấy khóa học theo category
-    public static List<Course> getCoursesByCategory(String category) {
-        List<Course> allCourses = getAllCourses();
-        List<Course> filteredCourses = new ArrayList<>();
+    public static List<CourseList> getCoursesByCategory(String category) {
+        List<CourseList> allCourses = getAllCourses();
+        List<CourseList> filteredCourses = new ArrayList<>();
 
-        for (Course course : allCourses) {
+        for (CourseList course : allCourses) {
             if (course.getCategory() != null && course.getCategory().equals(category)) {
                 filteredCourses.add(course);
             }
@@ -69,8 +69,8 @@ public class DataRepository {
     }
 
     // Phương thức trả về thông tin người dùng hiện tại (giả lập)
-    public static User getCurrentUser() {
-        return new User(
+    public static UserMain getCurrentUser() {
+        return new UserMain(
                 "user1",
                 "Alex Joe",
                 "alexjoe@example.com",
@@ -79,9 +79,9 @@ public class DataRepository {
     }
 
     // Mock data for courses with image URLs (giữ lại để tương thích với code cũ)
-    public static List<Course> getMockCourses() {
-        List<Course> courses = new ArrayList<>();
-        courses.add(new Course(
+    public static List<CourseList> getMockCourses() {
+        List<CourseList> courses = new ArrayList<>();
+        courses.add(new CourseList(
                 "c1",
                 "Generator on there Internet trend",
                 "Stephen Morris",

@@ -1,6 +1,6 @@
 package com.example.mobileproject.model;
 
-public class Course {
+public class CourseList {
     private String id;
     private String title;
     private String authorName;
@@ -10,8 +10,8 @@ public class Course {
     private String imageUrl;
     private String category;
 
-    public Course(String id, String title, String authorName, double price, float rating,
-                  boolean isBestSeller, String imageUrl, String category) {
+    public CourseList(String id, String title, String authorName, double price, float rating,
+                      boolean isBestSeller, String imageUrl, String category) {
         this.id = id;
         this.title = title;
         this.authorName = authorName;

@@ -27,7 +27,7 @@ import com.example.mobileproject.adapter.CategoryAdapter;
 import com.example.mobileproject.adapter.CourseListAdapter;
 import com.example.mobileproject.api.RetrofitClient;
 import com.example.mobileproject.model.Category;
-import com.example.mobileproject.model.Course;
+import com.example.mobileproject.model.CourseList;
 import com.example.mobileproject.model.CourseResponse;
 import com.example.mobileproject.model.PagedResponse;
 import com.example.mobileproject.repository.DataRepository;
@@ -56,7 +56,7 @@ public class AllCoursesFragment extends Fragment implements CategoryAdapter.OnCa
     private EditText searchEditText;
     private CardView btnSearch;
 
-    private List<Course> displayedCourses = new ArrayList<>();
+    private List<CourseList> displayedCourses = new ArrayList<>();
     private String selectedCategory = null;
     private String searchQuery = null;
     private int currentPage = 0;
@@ -261,7 +261,7 @@ public class AllCoursesFragment extends Fragment implements CategoryAdapter.OnCa
                             PagedResponse<CourseResponse> pagedResponse = response.body();
 
                             // Chuyển đổi từ CourseResponse sang Course
-                            List<Course> newCourses = new ArrayList<>();
+                            List<CourseList> newCourses = new ArrayList<>();
                             for (CourseResponse courseResponse : pagedResponse.getItems()) {
                                 newCourses.add(courseResponse.toCourse());
                             }
@@ -321,13 +321,13 @@ public class AllCoursesFragment extends Fragment implements CategoryAdapter.OnCa
 
     private void loadFallbackData() {
         // Tải dữ liệu mẫu từ DataRepository trong trường hợp API không hoạt động
-        List<Course> fallbackCourses;
+        List<CourseList> fallbackCourses;
         if (selectedCategory != null) {
             fallbackCourses = DataRepository.getCoursesByCategory(selectedCategory);
         } else if (searchQuery != null && !searchQuery.isEmpty()) {
             // Giả lập tìm kiếm trong dữ liệu mẫu
             fallbackCourses = new ArrayList<>();
-            for (Course course : DataRepository.getAllCourses()) {
+            for (CourseList course : DataRepository.getAllCourses()) {
                 if (course.getTitle().toLowerCase().contains(searchQuery.toLowerCase())) {
                     fallbackCourses.add(course);
                 }

@@ -63,8 +63,8 @@ public class CourseResponse {
     }
 
     // Phương thức chuyển đổi từ CourseResponse sang Course
-    public Course toCourse() {
-        return new Course(
+    public CourseList toCourse() {
+        return new CourseList(
                 String.valueOf(courseId),
                 title,
                 instructorName,

@@ -14,7 +14,7 @@ import com.example.mobileproject.fragment.FavoriteFragment;
 import com.example.mobileproject.fragment.HomeFragment;
 import com.example.mobileproject.fragment.CoursesFragment;
 import com.example.mobileproject.fragment.ProfileFragment;
-import com.example.mobileproject.model.User;
+import com.example.mobileproject.model.UserMain;
 import com.example.mobileproject.repository.DataRepository;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -24,7 +24,7 @@ public class MainActivityHomePage extends AppCompatActivity {
     private CardView btnLeftAction;
     private ImageView leftActionIcon;
     private boolean isBackButton = false;
-    private User currentUser;
+    private UserMain currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -21,7 +21,7 @@ import com.example.mobileproject.MainActivityHomePage;
 import com.example.mobileproject.R;
 import com.example.mobileproject.adapter.CourseAdapter;
 import com.example.mobileproject.api.RetrofitClient;
-import com.example.mobileproject.model.Course;
+import com.example.mobileproject.model.CourseList;
 import com.example.mobileproject.model.CourseResponse;
 import com.example.mobileproject.repository.DataRepository;
 
@@ -42,7 +42,7 @@ public class HomeFragment extends Fragment {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private int currentImageIndex = 0;
     private int[] bannerImageResources;
-    private List<Course> courseList = new ArrayList<>();
+    private List<CourseList> courseList = new ArrayList<>();
 
     private final Runnable imageRunnable = new Runnable() {
         @Override
@@ -170,7 +170,7 @@ public class HomeFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     // Chuyển đổi dữ liệu từ API sang format phù hợp với ứng dụng
                     List<CourseResponse> courseResponses = response.body();
-                    List<Course> courses = new ArrayList<>();
+                    List<CourseList> courses = new ArrayList<>();
 
                     for (CourseResponse courseResponse : courseResponses) {
                         courses.add(courseResponse.toCourse());
@@ -209,7 +209,7 @@ public class HomeFragment extends Fragment {
 
     private void loadFallbackData() {
         // Tải dữ liệu mẫu từ DataRepository trong trường hợp API không hoạt động
-        List<Course> fallbackCourses = DataRepository.getMockCourses();
+        List<CourseList> fallbackCourses = DataRepository.getMockCourses();
         courseList.clear();
         courseList.addAll(fallbackCourses);
         courseAdapter.notifyDataSetChanged();

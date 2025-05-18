@@ -1,17 +1,17 @@
 package com.example.mobileproject.model;
 
-public class User {
+public class UserMain {
     private String id;
     private String name;
     private String email;
     private String profileImageUrl;
 
     // Constructor mặc định
-    public User() {
+    public UserMain() {
     }
 
     // Constructor đầy đủ tham số
-    public User(String id, String name, String email, String profileImageUrl) {
+    public UserMain(String id, String name, String email, String profileImageUrl) {
         this.id = id;
         this.name = name;
         this.email = email;
