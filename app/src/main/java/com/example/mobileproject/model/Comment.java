@@ -1,16 +1,24 @@
 package com.example.mobileproject.model;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Comment {
+public class Comment implements Serializable {
+    @SerializedName("comment_id")
     private Integer commentId;
+    @SerializedName("user_id")
     private Integer userId;
+    @SerializedName("lesson_id")
     private Integer lessonId;
+    @SerializedName("comment")
     private String comment;
+    @SerializedName("created_at")
     private LocalDateTime createdAt;
+    @SerializedName("user")
     private User user;
     private Lesson lesson;
-
     // Constructor
     public Comment() {
     }

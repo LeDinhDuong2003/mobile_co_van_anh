@@ -1,8 +1,9 @@
 package com.example.mobileproject.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Wishlist {
+public class Wishlist implements Serializable {
     private Integer wishlistId;
     private Integer userId;
     private Integer courseId;

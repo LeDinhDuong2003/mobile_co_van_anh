@@ -1,21 +1,35 @@
 package com.example.mobileproject.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.w3c.dom.Comment;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class User {
+public class User implements Serializable {
+    @SerializedName("user_id")
     private Integer userId;
+    @SerializedName("username")
     private String username;
+    @SerializedName("full_name")
     private String fullName;
+    @SerializedName("password")
     private String password;
+    @SerializedName("email")
     private String email;
+    @SerializedName("phone")
     private String phone;
+    @SerializedName("avatar_url")
     private String avatarUrl;
+    @SerializedName("google_id")
     private String googleId;
+    @SerializedName("role")
     private String role;
+    @SerializedName("created_at")
     private LocalDateTime createdAt;
     private List<Wishlist> wishlists = new ArrayList<>();
     private List<Enrollment> enrollments = new ArrayList<>();
@@ -61,4 +75,11 @@ public class User {
     public void setQuizResults(List<QuizResult> quizResults) { this.quizResults = quizResults; }
     public List<Notification> getNotifications() { return notifications; }
     public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
+
+    public List<Course> getCourses() {
+        return enrollments.stream()
+                .map(Enrollment::getCourse)
+                .collect(Collectors.toList());
+    }
+
 }

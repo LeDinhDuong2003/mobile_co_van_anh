@@ -1,10 +1,11 @@
 package com.example.mobileproject.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Notification {
+public class Notification implements Serializable {
     private Integer notificationId;
     private String title;
     private String message;

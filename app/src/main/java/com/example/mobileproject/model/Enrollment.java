@@ -1,14 +1,24 @@
 package com.example.mobileproject.model;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Enrollment {
+public class Enrollment implements Serializable {
+    @SerializedName("enrollment_id")
     private Integer enrollmentId;
+    @SerializedName("user_id")
     private Integer userId;
+    @SerializedName("course_id")
     private Integer courseId;
+    @SerializedName("enrolled_at")
     private LocalDateTime enrolledAt;
+    @SerializedName("progress")
     private Float progress;
+    @SerializedName("user")
     private User user;
+    @SerializedName("course")
     private Course course;
 
     // Constructor
