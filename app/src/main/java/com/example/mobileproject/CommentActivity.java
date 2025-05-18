@@ -137,35 +137,35 @@ public class CommentActivity extends AppCompatActivity {
     }
 
     private void addCommentToServer(Comment comment) {
-        ApiService apiService = RetrofitClient.getClient();
-        Call<Comment> call = apiService.addComment(comment);
-        call.enqueue(new Callback<Comment>() {
-            @Override
-            public void onResponse(Call<Comment> call, Response<Comment> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    comments.add(response.body());
-                    if (adapter != null) {
-                        adapter.notifyItemInserted(comments.size() - 1);
-                    }
-                    EditText commentInput = findViewById(R.id.input_comment);
-                    if (commentInput != null) {
-                        commentInput.setText("");
-                    }
-                    if (repliesCount != null) {
-                        repliesCount.setText(comments.size() + " Replies");
-                    }
-                    Toast.makeText(CommentActivity.this, "Comment submitted", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(CommentActivity.this, "Failed to submit comment", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Comment> call, Throwable t) {
-                Log.e("CommentActivity", "Error adding comment", t);
-                Toast.makeText(CommentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+//        ApiService apiService = RetrofitClient.getClient();
+//        Call<Comment> call = apiService.addComment(comment);
+//        call.enqueue(new Callback<Comment>() {
+//            @Override
+//            public void onResponse(Call<Comment> call, Response<Comment> response) {
+//                if (response.isSuccessful() && response.body() != null) {
+//                    comments.add(response.body());
+//                    if (adapter != null) {
+//                        adapter.notifyItemInserted(comments.size() - 1);
+//                    }
+//                    EditText commentInput = findViewById(R.id.input_comment);
+//                    if (commentInput != null) {
+//                        commentInput.setText("");
+//                    }
+//                    if (repliesCount != null) {
+//                        repliesCount.setText(comments.size() + " Replies");
+//                    }
+//                    Toast.makeText(CommentActivity.this, "Comment submitted", Toast.LENGTH_SHORT).show();
+//                } else {
+//                    Toast.makeText(CommentActivity.this, "Failed to submit comment", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Comment> call, Throwable t) {
+//                Log.e("CommentActivity", "Error adding comment", t);
+//                Toast.makeText(CommentActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
     private void showErrorDialog(String message) {
