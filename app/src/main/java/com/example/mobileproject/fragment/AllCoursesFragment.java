@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,7 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.mobileproject.MainActivity;
+import com.example.mobileproject.MainActivityHomePage;
 import com.example.mobileproject.R;
 import com.example.mobileproject.adapter.CategoryAdapter;
 import com.example.mobileproject.adapter.CourseListAdapter;
@@ -70,8 +69,8 @@ public class AllCoursesFragment extends Fragment implements CategoryAdapter.OnCa
         super.onCreate(savedInstanceState);
 
         // Khi fragment được tạo, đổi nút góc trái thành Back
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).setBackButton();
+        if (getActivity() instanceof MainActivityHomePage) {
+            ((MainActivityHomePage) getActivity()).setBackButton();
         }
     }
 
@@ -384,8 +383,8 @@ public class AllCoursesFragment extends Fragment implements CategoryAdapter.OnCa
         handler.removeCallbacksAndMessages(null);
 
         // Khi fragment bị hủy, đổi lại nút góc trái thành Menu
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).setMenuButton();
+        if (getActivity() instanceof MainActivityHomePage) {
+            ((MainActivityHomePage) getActivity()).setMenuButton();
         }
     }
 }

@@ -17,15 +17,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.example.mobileproject.MainActivity;
+import com.example.mobileproject.MainActivityHomePage;
 import com.example.mobileproject.R;
 import com.example.mobileproject.adapter.CourseAdapter;
 import com.example.mobileproject.api.RetrofitClient;
 import com.example.mobileproject.model.Course;
 import com.example.mobileproject.model.CourseResponse;
-import com.example.mobileproject.model.PagedResponse;
 import com.example.mobileproject.repository.DataRepository;
 
 import java.util.ArrayList;
@@ -234,8 +231,8 @@ public class HomeFragment extends Fragment {
         if (bannerImageResources != null && bannerImageResources.length > 0) {
             startBannerAutoChange();
         }
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).setMenuButton();
+        if (getActivity() instanceof MainActivityHomePage) {
+            ((MainActivityHomePage) getActivity()).setMenuButton();
         }
     }
 

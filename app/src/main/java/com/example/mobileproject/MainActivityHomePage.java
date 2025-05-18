@@ -6,7 +6,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
@@ -19,7 +18,7 @@ import com.example.mobileproject.model.User;
 import com.example.mobileproject.repository.DataRepository;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivityHomePage extends AppCompatActivity {
 
     private TextView tvGreeting;
     private CardView btnLeftAction;
