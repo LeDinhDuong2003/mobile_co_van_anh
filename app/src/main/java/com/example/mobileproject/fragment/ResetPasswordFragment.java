@@ -1,49 +1,89 @@
-package com.example.mobileproject;
+package com.example.mobileproject.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
+import com.example.mobileproject.LoginActivity;
+import com.example.mobileproject.R;
 import com.example.mobileproject.api.ApiService;
 import com.example.mobileproject.api.RetrofitClient;
 import com.example.mobileproject.model.User;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ResetPasswordActivity extends AppCompatActivity {
+public class ResetPasswordFragment extends Fragment {
     private static final String TAG = "🔥 quan 🔥";
+    private static final String ARG_PHONE = "phone";
+
     private EditText edtNewPassword, edtConfirmPassword;
     private Button btnContinue;
     private String phone;
+    private ResetPasswordFragmentListener listener;
+
+    public interface ResetPasswordFragmentListener {
+        void onPasswordReset();
+    }
+
+    public ResetPasswordFragment() {
+        // Required empty public constructor
+    }
+
+    public static ResetPasswordFragment newInstance(String phone) {
+        ResetPasswordFragment fragment = new ResetPasswordFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_PHONE, phone);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.laylaimatkhau);
+        if (getArguments() != null) {
+            phone = getArguments().getString(ARG_PHONE);
+        }
+    }
 
-        // Lấy phone từ Intent
-        phone = getIntent().getStringExtra("phone");
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof ResetPasswordFragmentListener) {
+            listener = (ResetPasswordFragmentListener) context;
+        } else {
+            throw new RuntimeException(context + " must implement ResetPasswordFragmentListener");
+        }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.laylaimatkhau, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         // Liên kết với layout
-        edtNewPassword = findViewById(R.id.getpassword_newpassword);
-        edtConfirmPassword = findViewById(R.id.getpassword_confirmpassword);
-        btnContinue = findViewById(R.id.getpassword_btn_continue);
+        edtNewPassword = view.findViewById(R.id.getpassword_newpassword);
+        edtConfirmPassword = view.findViewById(R.id.getpassword_confirmpassword);
+        btnContinue = view.findViewById(R.id.getpassword_btn_continue);
 
         // Xử lý nút Continue
         btnContinue.setOnClickListener(v -> {
@@ -52,11 +92,11 @@ public class ResetPasswordActivity extends AppCompatActivity {
 
             // Kiểm tra mật khẩu
             if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập đầy đủ mật khẩu", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Vui lòng nhập đầy đủ mật khẩu", Toast.LENGTH_SHORT).show();
                 return;
             }
             if (!newPassword.equals(confirmPassword)) {
-                Toast.makeText(this, "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -73,12 +113,13 @@ public class ResetPasswordActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.isSuccessful()) {
-                        Toast.makeText(ResetPasswordActivity.this,
+                        Toast.makeText(getContext(),
                                 "Đặt lại mật khẩu thành công", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(ResetPasswordActivity.this,
-                                LoginActivity.class);
+                        Intent intent = new Intent(getActivity(), LoginActivity.class);
                         startActivity(intent);
-                        finish();
+                        if (listener != null) {
+                            listener.onPasswordReset();
+                        }
                     } else {
                         String errorMessage = "Lỗi đặt lại mật khẩu";
                         try {
@@ -90,14 +131,14 @@ public class ResetPasswordActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             Log.e(TAG, "Error parsing error response: ", e);
                         }
-                        Toast.makeText(ResetPasswordActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     Log.e(TAG, "Network error: ", t);
-                    Toast.makeText(ResetPasswordActivity.this, "Lỗi kết nối: " +
+                    Toast.makeText(getContext(), "Lỗi kết nối: " +
                             t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
