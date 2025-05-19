@@ -6,6 +6,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import com.example.mobileproject.fragment.FavoriteFragment;
 import com.example.mobileproject.fragment.HomeFragment;
 import com.example.mobileproject.fragment.CoursesFragment;
+import com.example.mobileproject.fragment.NotificationsFragment;
 import com.example.mobileproject.fragment.ProfileFragment;
 import com.example.mobileproject.model.UserMain;
 import com.example.mobileproject.repository.DataRepository;
@@ -67,6 +69,10 @@ public class MainActivityHomePage extends AppCompatActivity {
                 }
                 else if (itemId == R.id.nav_favorite) {
                     selectedFragment = new FavoriteFragment();
+                    setMenuButton(); // Reset về Menu cho các tabs khác
+                }
+                else if (itemId == R.id.nav_notifications) {
+                    selectedFragment = new NotificationsFragment();
                     setMenuButton(); // Reset về Menu cho các tabs khác
                 }
                 else if (itemId == R.id.nav_courses) {
