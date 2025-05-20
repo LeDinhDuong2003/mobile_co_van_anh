@@ -137,7 +137,7 @@ public class CommentActivity extends AppCompatActivity {
     }
 
     private void addCommentToServer(Comment comment) {
-//        ApiService apiService = RetrofitClient.getClient();
+        ApiService apiService = RetrofitClient.getClient();
 //        Call<Comment> call = apiService.addComment(comment);
 //        call.enqueue(new Callback<Comment>() {
 //            @Override
