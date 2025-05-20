@@ -18,7 +18,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
         <activity
-            android:name=".LoginActivity"
+            android:name=".CountdownActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,6 +26,9 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ScoreActivity"
+            android:exported="false"/>
         <activity
             android:name=".PreviewActivity"
             android:exported="false" />
@@ -35,6 +38,9 @@
         <activity
             android:name=".ChangePasswordActivity"
             android:exported="false" />
+        <activity
+            android:name=".QuizActivity"
+            android:exported="false"/>
         <activity
             android:name=".ResultActivity"
             android:exported="false" />
@@ -56,11 +62,6 @@
         <activity
             android:name=".PasswordRecoverSuccessActivity"
             android:exported="false" />
-<!--        <activity-->
-<!--            android:name=".ResultActivity"-->
-<!--            android:exported="false" />-->
-
-
         <activity
             android:name=".CommentActivity"
             android:exported="true">

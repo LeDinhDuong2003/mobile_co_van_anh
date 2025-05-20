@@ -32,39 +32,45 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="16dp"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp">
 
-            <ImageView
-                android:id="@+id/instructor_image"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/teacher" />
+            <!-- Bên trái: Ảnh + Tên -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/instructor_name"
+                <ImageView
+                    android:id="@+id/instructor_image"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/teacher"
+                    android:contentDescription="Instructor" />
+
+                <TextView
+                    android:id="@+id/instructor_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="8dp"
+                    android:text="Tên giảng viên" />
+            </LinearLayout>
+
+            <!-- Bên phải: Nút Enroll -->
+            <Button
+                android:id="@+id/enrollButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp"/>
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-            <ImageButton
-                android:id="@+id/favoriteButton"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="16dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Save to favorites"
-                android:src="@drawable/ic_favorite_border"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/course_title"
-                app:layout_constraintBottom_toBottomOf="@id/course_title"
-                app:tint="@color/white"/>
+                android:text="Mua khóa học"
+                android:backgroundTint="#6200EE"
+                android:textColor="#FFFFFF" />
         </LinearLayout>
+
 
         <TextView
             android:id="@+id/course_title"
@@ -74,7 +80,7 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-<!--        <ImageButton-->
+       <!-- <ImageButton-->
 <!--            android:id="@+id/favoriteButton"-->
 <!--            android:layout_width="48dp"-->
 <!--            android:layout_height="48dp"-->
@@ -85,7 +91,7 @@
 <!--            app:layout_constraintEnd_toEndOf="parent"-->
 <!--            app:layout_constraintTop_toTopOf="@id/course_title"-->
 <!--            app:layout_constraintBottom_toBottomOf="@id/course_title"-->
-<!--            app:tint="@color/white" />-->
+<!--            app:tint="@color/white" /> -->
 
         <LinearLayout
             android:layout_width="match_parent"
