@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.mobileproject.ChangeProfileActivity;
+import com.example.mobileproject.LoginActivity;
 import com.example.mobileproject.PreviewActivity;
 import com.example.mobileproject.R;
 import com.example.mobileproject.ScoreActivity;
@@ -38,7 +39,7 @@ public class ProfileFragment extends Fragment {
     private ImageView profileAvatar, profileBtnChangeAvatar, profileBtnEdit;
     private TextView profileName;
     private EditText profileEmail, profilePassword, profilePhone;
-    private Button btnlichsu;
+    private Button btnlichsu, btnDangXuat;
     private Uri selectedImageUri;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private SharedPreferences sharedPreferences;
@@ -61,6 +62,7 @@ public class ProfileFragment extends Fragment {
         profilePassword = view.findViewById(R.id.profile_password);
         profilePhone = view.findViewById(R.id.profile_phone);
         btnlichsu = view.findViewById(R.id.xemlichsulambai);
+        btnDangXuat = view.findViewById(R.id.dangxuat);
 
         String fullName = sharedPreferences.getString("full_name", "Không có tên");
         String email = sharedPreferences.getString("email", "");
@@ -107,6 +109,18 @@ public class ProfileFragment extends Fragment {
         btnlichsu.setOnClickListener(v->{
             Intent intent = new Intent(requireContext(), ScoreActivity.class);
             startActivity(intent);
+        });
+
+        btnDangXuat.setOnClickListener(v -> {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear();
+            editor.apply();
+            Intent loginIntent = new Intent(requireContext(), LoginActivity.class);
+            startActivity(loginIntent);
+            if (getActivity() != null) {
+                getActivity().finish();
+            }
+            Toast.makeText(requireContext(), "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
         });
     }
 

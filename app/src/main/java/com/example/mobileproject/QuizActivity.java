@@ -2,6 +2,7 @@ package com.example.mobileproject;
 
 import android.animation.ValueAnimator;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -37,7 +38,8 @@ public class QuizActivity extends AppCompatActivity {
     private int currentQuestion = 0;
     private int score = 0;
     private boolean answered = false;
-
+    private SharedPreferences sharedPreferences;
+    private int LESSION_ID;
     private List<QuizQuestion> quizQuestions = new ArrayList<>();
     private static final String TAG = "🔥 quan 🔥";
 
@@ -45,12 +47,12 @@ public class QuizActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
-
         questionNumberText = findViewById(R.id.questionNumber);
         questionText = findViewById(R.id.questionText);
         resultText = findViewById(R.id.resultText);
         timeProgress = findViewById(R.id.timeProgress);
-
+        sharedPreferences = getSharedPreferences("user_info", MODE_PRIVATE);
+        LESSION_ID = sharedPreferences.getInt("lession_id", 1);
         options[0] = findViewById(R.id.option1);
         options[1] = findViewById(R.id.option2);
         options[2] = findViewById(R.id.option3);
@@ -88,7 +90,7 @@ public class QuizActivity extends AppCompatActivity {
 
                 // Gửi lesson_id
                 JSONObject jsonInput = new JSONObject();
-                jsonInput.put("lesson_id", 1);
+                jsonInput.put("lesson_id", LESSION_ID);
                 String jsonString = jsonInput.toString();
                 Log.d(TAG, "🔥 Request body: " + jsonString);
 

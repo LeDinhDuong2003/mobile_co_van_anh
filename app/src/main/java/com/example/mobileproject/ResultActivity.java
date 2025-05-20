@@ -1,6 +1,7 @@
 package com.example.mobileproject;
 
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -27,6 +28,7 @@ public class ResultActivity extends AppCompatActivity {
     private int dotCount = 1;
     private Runnable dotRunnable;
     private SharedPreferences sharedPreferences;
+    private MediaPlayer mediaPlayer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +39,7 @@ public class ResultActivity extends AppCompatActivity {
         scoreText = findViewById(R.id.scoreText);
         messageText = findViewById(R.id.messageText);
         btnBack = findViewById(R.id.backButton);
-
+        mediaPlayer = MediaPlayer.create(this, R.raw.result);
         titleText.setText("Hoàn Thành");
         scoreText.setText("");
         messageText.setText("Đang xử lý kết quả của bạn.");
@@ -57,6 +59,9 @@ public class ResultActivity extends AppCompatActivity {
         saveQuizResult(USER_ID, questionId, score, total);
 
         btnBack.setOnClickListener(v->{
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
             finish();
         });
     }
@@ -126,6 +131,9 @@ public class ResultActivity extends AppCompatActivity {
                             scoreText.setVisibility(View.VISIBLE);
                             handler.removeCallbacks(dotRunnable);
                             messageText.setVisibility(View.GONE);
+                            if (mediaPlayer != null) {
+                                mediaPlayer.start();
+                            }
                         } else {
                             String errorMessage = jsonResult.has("error") ?
                                     jsonResult.getString("error") :

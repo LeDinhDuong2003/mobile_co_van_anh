@@ -17,7 +17,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
         <activity
-            android:name=".LoginActivity"
+            android:name=".CountdownActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,6 +37,9 @@
         <activity
             android:name=".ChangePasswordActivity"
             android:exported="false" />
+        <activity
+            android:name=".QuizActivity"
+            android:exported="false"/>
         <activity
             android:name=".ResultActivity"
             android:exported="false" />
