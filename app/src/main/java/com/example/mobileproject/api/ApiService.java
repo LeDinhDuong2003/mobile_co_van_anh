@@ -6,11 +6,16 @@ import com.example.mobileproject.model.Comment;
 import com.example.mobileproject.model.Course;
 import com.example.mobileproject.model.CourseResponse;
 import com.example.mobileproject.model.Enrollment;
+import com.example.mobileproject.model.FCMTokenRequest;
+import com.example.mobileproject.model.FCMTokenResponse;
 import com.example.mobileproject.model.Lesson;
+import com.example.mobileproject.model.NotificationModel;
 import com.example.mobileproject.model.PagedResponse;
 import com.example.mobileproject.model.Review;
 import com.example.mobileproject.model.ScoreResponse;
 import com.example.mobileproject.model.User;
+import com.example.mobileproject.model.WishlistRequest;
+import com.example.mobileproject.model.WishlistResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -95,4 +100,30 @@ public interface ApiService {
 
     @POST("courses/{courseId}/enrollments")
     Call<Enrollment> enrollInCourse(@Path("courseId") int courseId, @Body Map<String, Integer> requestBody);
+}
+
+
+    @GET("users/{userId}/notifications")
+    Call<List<NotificationModel>> getUserNotifications(@Path("userId") int userId);
+
+    @POST("users/{userId}/notifications/{notificationId}/read")
+    Call<Void> markNotificationAsRead(@Path("userId") int userId, @Path("notificationId") int notificationId);
+
+    @POST("users/{userId}/fcm-token")
+    Call<FCMTokenResponse> updateFCMToken(
+            @Path("userId") int userId,
+            @Body FCMTokenRequest request
+    );
+
+    @GET("users/{userId}/wishlists")
+    Call<List<CourseResponse>> getUserWishlists(@Path("userId") int userId);
+
+    @POST("wishlists/add")
+    Call<WishlistResponse> addToWishlist(@Body WishlistRequest request);
+
+    @POST("wishlists/remove")
+    Call<Void> removeFromWishlist(@Body WishlistRequest request);
+
+    @GET("wishlists/check")
+    Call<Boolean> checkWishlist(@Query("userId") int userId, @Query("courseId") int courseId);
 }

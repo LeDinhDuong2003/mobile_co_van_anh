@@ -1,6 +1,10 @@
 // app/src/main/java/com/example/mobileproject/api/RetrofitClient.java
 package com.example.mobileproject.api;
 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import java.time.LocalDateTime;
@@ -11,8 +15,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitClient {
     private static Retrofit retrofit;
     private static ApiService apiService;
-    private static final String BASE_URL = "http://10.0.2.2:8000/"; // Replace with your FastAPI URL
+    private static final String BASE_URL = "http://192.168.30.111:8000/"; // Replace with your FastAPI URL
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public static ApiService getClient() {
         if (retrofit == null) {
             GsonBuilder gsonBuilder = new GsonBuilder();

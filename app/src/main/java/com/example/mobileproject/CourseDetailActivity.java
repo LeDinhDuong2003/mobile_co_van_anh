@@ -2,11 +2,13 @@ package com.example.mobileproject;
 
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -28,6 +30,9 @@ import com.example.mobileproject.model.Enrollment;
 import com.example.mobileproject.model.Lesson;
 import com.example.mobileproject.model.Review;
 import com.example.mobileproject.model.User;
+import com.example.mobileproject.model.WishlistRequest;
+import com.example.mobileproject.model.WishlistResponse;
+import com.example.mobileproject.util.SessionManager;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -53,6 +58,12 @@ public class CourseDetailActivity extends AppCompatActivity {
     private static final int TOTAL_API_CALLS = 4; // checkEnrollment, getCourseById, getLessons, getReviews
 
     Button enrollButton;
+    private static final int TOTAL_API_CALLS = 5; // checkEnrollment, getCourseById, getLessons, getReviews, checkWishlist
+
+    // New variables for wishlist functionality
+    private ImageButton favoriteButton;
+    private boolean isInWishlist = false;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +116,8 @@ public class CourseDetailActivity extends AppCompatActivity {
             }
         });
 
+        sessionManager = SessionManager.getInstance(this);
+
         RecyclerView reviewsRecyclerView = findViewById(R.id.reviewsRecyclerView);
         if (reviewsRecyclerView != null) {
             reviewsRecyclerView.setVisibility(View.GONE);
@@ -118,12 +131,116 @@ public class CourseDetailActivity extends AppCompatActivity {
             backButton.setOnClickListener(v -> finish());
         }
 
+        // Initialize favorite button
+        favoriteButton = findViewById(R.id.favoriteButton);
+        if (favoriteButton != null) {
+            favoriteButton.setOnClickListener(v -> toggleWishlist());
+        }
+
         lessons = new ArrayList<>();
         reviews = new ArrayList<>();
         checkEnrollmentStatus();
         fetchCourseData();
         fetchLessons();
         fetchReviews();
+        checkWishlistStatus();
+    }
+
+    private void checkWishlistStatus() {
+        Integer userId = sessionManager.getUserId();
+        if (userId == null || userId == -1) {
+            Log.e(TAG, "Invalid user ID");
+            return;
+        }
+
+        ApiService apiService = RetrofitClient.getClient();
+        Call<Boolean> call = apiService.checkWishlist(userId, courseId);
+        call.enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    isInWishlist = response.body();
+                    updateFavoriteButton();
+                } else {
+                    isInWishlist = false;
+                    updateFavoriteButton();
+                }
+
+                apiCallsCompleted++;
+                trySetupUI();
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+                Log.e(TAG, "Error checking wishlist status", t);
+                isInWishlist = false;
+                updateFavoriteButton();
+
+                apiCallsCompleted++;
+                trySetupUI();
+            }
+        });
+    }
+
+    private void updateFavoriteButton() {
+        if (favoriteButton != null) {
+            favoriteButton.setImageResource(isInWishlist ?
+                    R.drawable.ic_favorite_filled :
+                    R.drawable.ic_favorite_border);
+        }
+    }
+
+    private void toggleWishlist() {
+        Integer userId = sessionManager.getUserId();
+        if (userId == null || userId == -1) {
+            Toast.makeText(this, "Please login to add to favorites", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ApiService apiService = RetrofitClient.getClient();
+        WishlistRequest request = new WishlistRequest(userId, courseId);
+
+        if (isInWishlist) {
+            // Remove from wishlist
+            Call<Void> call = apiService.removeFromWishlist(request);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful()) {
+                        isInWishlist = false;
+                        updateFavoriteButton();
+                        Toast.makeText(CourseDetailActivity.this, "Removed from favorites", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(CourseDetailActivity.this, "Failed to remove from favorites", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(CourseDetailActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            // Add to wishlist
+            Call<WishlistResponse> call = apiService.addToWishlist(request);
+            call.enqueue(new Callback<WishlistResponse>() {
+                @Override
+                public void onResponse(Call<WishlistResponse> call, Response<WishlistResponse> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        isInWishlist = true;
+                        updateFavoriteButton();
+                        Toast.makeText(CourseDetailActivity.this, "Added to favorites", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(CourseDetailActivity.this, "Failed to add to favorites", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<WishlistResponse> call, Throwable t) {
+                    Toast.makeText(CourseDetailActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void updateEnrollButtonVisibility() {
@@ -393,6 +510,9 @@ public class CourseDetailActivity extends AppCompatActivity {
                 }
             });
         }
+
+        // Update favorite button
+        updateFavoriteButton();
     }
 
     private void addReviewToServer(Review review) {
@@ -442,6 +562,7 @@ public class CourseDetailActivity extends AppCompatActivity {
                     fetchCourseData();
                     fetchLessons();
                     fetchReviews();
+                    checkWishlistStatus();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> finish())
                 .show();
