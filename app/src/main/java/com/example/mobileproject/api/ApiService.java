@@ -100,8 +100,6 @@ public interface ApiService {
 
     @POST("courses/{courseId}/enrollments")
     Call<Enrollment> enrollInCourse(@Path("courseId") int courseId, @Body Map<String, Integer> requestBody);
-}
-
 
     @GET("users/{userId}/notifications")
     Call<List<NotificationModel>> getUserNotifications(@Path("userId") int userId);

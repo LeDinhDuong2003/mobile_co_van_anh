@@ -55,7 +55,7 @@ public class CourseDetailActivity extends AppCompatActivity {
     private boolean isEnrolled;
     private ReviewAdapter reviewAdapter;
     private int apiCallsCompleted = 0;
-    private static final int TOTAL_API_CALLS = 4; // checkEnrollment, getCourseById, getLessons, getReviews
+//    private static final int TOTAL_API_CALLS = 4; // checkEnrollment, getCourseById, getLessons, getReviews
 
     Button enrollButton;
     private static final int TOTAL_API_CALLS = 5; // checkEnrollment, getCourseById, getLessons, getReviews, checkWishlist
