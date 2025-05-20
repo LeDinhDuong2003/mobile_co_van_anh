@@ -48,7 +48,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dangnhap);
 
-        // Ánh xạ view
         edtUsername = findViewById(R.id.login_username);
         edtPassword = findViewById(R.id.login_password);
         btnSignIn = findViewById(R.id.login_btn_sign_in);
@@ -56,14 +55,12 @@ public class LoginActivity extends AppCompatActivity {
         txtForgotPassword = findViewById(R.id.login_forgot_password);
         txtSignUp = findViewById(R.id.login_signup);
 
-        // Cấu hình Google Sign-In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .requestIdToken(CLIENT_ID)
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        // Khởi tạo launcher cho Google Sign-In
         googleSignInLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -76,18 +73,14 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-        // LoginActivity.java
         btnSignIn.setOnClickListener(v -> {
             String username = edtUsername.getText().toString().trim();
             String password = edtPassword.getText().toString().trim();
             Log.d(TAG, "🔥 Attempting login with username: " + username);
-
             if (username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập username và password", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            // Tạo đối tượng User cho request
             User loginUser = new User();
             loginUser.setUsername(username);
             loginUser.setPassword(password);
@@ -128,8 +121,6 @@ public class LoginActivity extends AppCompatActivity {
             });
         });
 
-
-
         // Đăng nhập bằng Google
 //        btnGoogle.setOnClickListener(v -> {
 //            Intent signInIntent = googleSignInClient.getSignInIntent();
@@ -142,14 +133,11 @@ public class LoginActivity extends AppCompatActivity {
             });
         });
 
-
-        // Quên mật khẩu
         txtForgotPassword.setOnClickListener(v -> {
             Intent intent = new Intent(this, ForgotPasswordActivity.class);
             startActivity(intent);
         });
 
-        // Chuyển sang Sign Up
         txtSignUp.setOnClickListener(v -> {
             Intent intent = new Intent(this, RegisterActivity.class);
             startActivity(intent);
@@ -164,6 +152,7 @@ public class LoginActivity extends AppCompatActivity {
         editor.putString("email", user.getEmail());
         editor.putString("avatar_url", user.getAvatarUrl());
         editor.putString("phone", user.getPhone());
+        editor.putString("role",user.getRole());
         editor.apply();
     }
 

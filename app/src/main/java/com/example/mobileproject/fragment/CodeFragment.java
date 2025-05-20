@@ -50,7 +50,6 @@ public class CodeFragment extends Fragment {
     }
 
     public CodeFragment() {
-        // Required empty public constructor
     }
 
     public static CodeFragment newInstance(String phone, String code) {
@@ -84,7 +83,6 @@ public class CodeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.nhapcode, container, false);
     }
 
@@ -92,7 +90,6 @@ public class CodeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Liên kết với layout
         edtCode1 = view.findViewById(R.id.code_s1);
         edtCode2 = view.findViewById(R.id.code_s2);
         edtCode3 = view.findViewById(R.id.code_s3);
@@ -101,23 +98,16 @@ public class CodeFragment extends Fragment {
         tvResendCode = view.findViewById(R.id.code_resendcode);
         tvCountdown = view.findViewById(R.id.countdown_timer);
 
-        // Thêm TextWatcher để tự động nhảy con trỏ
         setupTextWatchers();
-
-        // Khởi động bộ đếm ngược 10 phút
         startCountdown();
 
-        // Xử lý nút Continue
         btnContinue.setOnClickListener(v -> {
             String code = edtCode1.getText().toString() + edtCode2.getText().toString() +
                     edtCode3.getText().toString() + edtCode4.getText().toString();
-
-            // Kiểm tra mã
             if (code.length() != 4) {
                 Toast.makeText(getContext(), "Vui lòng nhập đủ 4 chữ số", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             if (code.equals(correctCode)) {
                 Toast.makeText(getContext(), "Xác nhận mã thành công", Toast.LENGTH_SHORT).show();
                 if (countDownTimer != null) {
@@ -130,13 +120,10 @@ public class CodeFragment extends Fragment {
                 Toast.makeText(getContext(), "Mã xác nhận không đúng", Toast.LENGTH_SHORT).show();
             }
         });
-
-        // Xử lý Resend Code
         tvResendCode.setOnClickListener(v -> resendCode());
     }
 
     private void setupTextWatchers() {
-        // TextWatcher cho edtCode1
         edtCode1.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -151,8 +138,6 @@ public class CodeFragment extends Fragment {
                 }
             }
         });
-
-        // TextWatcher cho edtCode2
         edtCode2.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -169,8 +154,6 @@ public class CodeFragment extends Fragment {
                 }
             }
         });
-
-        // TextWatcher cho edtCode3
         edtCode3.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -187,8 +170,6 @@ public class CodeFragment extends Fragment {
                 }
             }
         });
-
-        // TextWatcher cho edtCode4
         edtCode4.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -227,7 +208,6 @@ public class CodeFragment extends Fragment {
     }
 
     private void resendCode() {
-        // Tạo mã mới
         correctCode = String.format("%04d", new Random().nextInt(10000));
         Log.d(TAG, "🔥 Generated new code: " + correctCode);
         sendSms(phone, correctCode);
@@ -285,7 +265,7 @@ public class CodeFragment extends Fragment {
                 getActivity().runOnUiThread(() -> {
                     if ("0".equals(status)) {
                         Log.d(TAG, "🔥 SMS sent successfully");
-                        Toast.makeText(getContext(), "Đã gửi SMS với mã xác nhận", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Đã gửi lại mã xác nhận, bạn hãy chú ý điện thoại của mình", Toast.LENGTH_SHORT).show();
                         proceedAfterResend(code);
                     } else {
                         Log.e(TAG, "🔥 SMS failed: " + errorText);

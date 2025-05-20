@@ -8,6 +8,7 @@ import com.example.mobileproject.model.CourseResponse;
 import com.example.mobileproject.model.Lesson;
 import com.example.mobileproject.model.PagedResponse;
 import com.example.mobileproject.model.Review;
+import com.example.mobileproject.model.ScoreResponse;
 import com.example.mobileproject.model.User;
 
 import java.util.List;
@@ -81,4 +82,12 @@ public interface ApiService {
 
     @POST("update-profile")
     Call<ResponseBody> updateProfile(@Body User user);
+
+    @GET("api/scores")
+    Call<PagedResponse<ScoreResponse>> getScores(
+            @Query("user_id") int userId,
+            @Query("page") int page,
+            @Query("page_size") int pageSize,
+            @Query("query") String query
+    );
 }

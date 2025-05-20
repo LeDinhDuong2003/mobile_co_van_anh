@@ -47,7 +47,6 @@ public class PhoneFragment extends Fragment {
     }
 
     public PhoneFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -63,7 +62,6 @@ public class PhoneFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.quenmatkhau, container, false);
     }
 
@@ -85,12 +83,10 @@ public class PhoneFragment extends Fragment {
     }
 
     private void checkPhoneNumber(String phone) {
-        // Tạo đối tượng User cho request
         User checkUser = new User();
         checkUser.setPhone(phone);
         Log.d(TAG, "🔥 Request body: { phone: " + phone + " }");
 
-        // Gọi API bằng Retrofit
         ApiService apiService = RetrofitClient.getClient();
         Call<ResponseBody> call = apiService.checkPhone(checkUser);
         call.enqueue(new Callback<ResponseBody>() {
@@ -177,7 +173,7 @@ public class PhoneFragment extends Fragment {
                 getActivity().runOnUiThread(() -> {
                     if ("0".equals(status)) {
                         Log.d(TAG, "🔥 SMS sent successfully");
-                        Toast.makeText(getContext(), "Đã gửi SMS với mã xác nhận", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Đã gửi mã xác nhận, bạn hãy chú ý điện thoại của mình", Toast.LENGTH_SHORT).show();
                         proceedToEnterCode(phone, code);
                     } else {
                         Log.e(TAG, "🔥 SMS failed: " + errorText);

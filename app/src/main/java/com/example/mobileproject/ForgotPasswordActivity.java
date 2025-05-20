@@ -25,9 +25,7 @@ public class ForgotPasswordActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
-
         if (savedInstanceState == null) {
-            // Start with the phone fragment
             loadFragment(new PhoneFragment(), PHONE_FRAGMENT_TAG, false);
         }
     }
@@ -64,7 +62,6 @@ public class ForgotPasswordActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        // Handle back press event
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (fragmentManager.getBackStackEntryCount() > 0) {
             fragmentManager.popBackStack();

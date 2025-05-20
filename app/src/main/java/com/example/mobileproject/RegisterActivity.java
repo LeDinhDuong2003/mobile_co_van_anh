@@ -39,7 +39,6 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dangky);
 
-        // Liên kết với layout
         edtUsername = findViewById(R.id.register_username);
         edtEmail = findViewById(R.id.register_email);
         edtPassword = findViewById(R.id.register_password);
@@ -48,14 +47,11 @@ public class RegisterActivity extends AppCompatActivity {
         btnCreateAccount = findViewById(R.id.register_btn_createaccount);
         tvSignIn = findViewById(R.id.register_signin);
 
-        // Xử lý nút Create Account
         btnCreateAccount.setOnClickListener(v -> {
             String username = edtUsername.getText().toString().trim();
             String email = edtEmail.getText().toString().trim();
             String password = edtPassword.getText().toString().trim();
             String phone = edtPhone.getText().toString().trim();
-
-            // Kiểm tra dữ liệu
             if (username.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
                 return;
@@ -68,19 +64,21 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(this, "Email phải có đuôi @gmail.com", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (password.length() <= 6) {
-                Toast.makeText(this, "Mật khẩu phải dài hơn 6 ký tự", Toast.LENGTH_SHORT).show();
+            if (password.length() < 6) {
+                Toast.makeText(this, "Mật khẩu phải có ít nhất 6 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (password.length() > 30) {
+                Toast.makeText(this, "Mật khẩu không quá 30 ký tự", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Tạo đối tượng User cho request
             User registerUser = new User();
             registerUser.setUsername(username);
             registerUser.setEmail(email);
             registerUser.setPassword(password);
             registerUser.setPhone(phone);
 
-            // Gọi API bằng Retrofit
             ApiService apiService = RetrofitClient.getClient();
             Call<User> call = apiService.register(registerUser);
             call.enqueue(new Callback<User>() {
@@ -120,7 +118,6 @@ public class RegisterActivity extends AppCompatActivity {
             });
         });
 
-        // Xử lý nút Sign in
         tvSignIn.setOnClickListener(v -> {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);

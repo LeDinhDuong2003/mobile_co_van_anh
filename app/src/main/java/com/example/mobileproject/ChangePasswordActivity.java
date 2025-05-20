@@ -7,20 +7,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.mobileproject.api.ApiService;
 import com.example.mobileproject.api.RetrofitClient;
 import com.example.mobileproject.model.ChangePassword;
-import com.example.mobileproject.model.User;
-
 import org.json.JSONObject;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,14 +20,16 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private static final String TAG = "🔥 quan 🔥";
     private EditText password, newPassword, confirmPassword;
     private Button btnSave, btnCancel;
-    SharedPreferences sharedPreferences = getSharedPreferences("user_info", MODE_PRIVATE);
-    int USER_ID = sharedPreferences.getInt("user_id", 1);
+    private SharedPreferences sharedPreferences;
+    private int USER_ID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.thaydoimatkhau);
 
+        sharedPreferences = getSharedPreferences("user_info", MODE_PRIVATE);
+        USER_ID = sharedPreferences.getInt("user_id", 1);
         password = findViewById(R.id.changepassword_password);
         newPassword = findViewById(R.id.changepassword_newpassword);
         confirmPassword = findViewById(R.id.changepassword_confirmpassword);
@@ -68,13 +60,16 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 Toast.makeText(this, "Mật khẩu mới phải có ít nhất 6 ký tự", Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (newPass.length() > 30) {
+                Toast.makeText(this, "Mật khẩu mới không quá 30 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             changePassword(currentPassword, newPass);
         });
     }
 
     private void changePassword(String currentPassword, String newPassword) {
-        // Tạo đối tượng User cho request
         ChangePassword changePasswordUser = new ChangePassword();
         changePasswordUser.setUser_id(USER_ID);
         changePasswordUser.setCurrent_password(currentPassword);
@@ -82,7 +77,6 @@ public class ChangePasswordActivity extends AppCompatActivity {
         Log.d(TAG, "🔥 Request body: { user_id: " + USER_ID + ", current_password: "
                 + currentPassword + ", new_password: " + newPassword + " }");
 
-        // Gọi API bằng Retrofit
         ApiService apiService = RetrofitClient.getClient();
         Call<ResponseBody> call = apiService.changePassword(changePasswordUser);
         call.enqueue(new Callback<ResponseBody>() {

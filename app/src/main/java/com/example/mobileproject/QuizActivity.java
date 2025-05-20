@@ -69,11 +69,10 @@ public class QuizActivity extends AppCompatActivity {
             });
         }
 
-        // Lấy dữ liệu từ API
-        fetchQuizData();
+        laydanhsachquizz();
     }
 
-    private void fetchQuizData() {
+    private void laydanhsachquizz() {
         new Thread(() -> {
             try {
                 String apiUrl = getString(R.string.base_url) + "/quizzes";
@@ -330,7 +329,6 @@ public class QuizActivity extends AppCompatActivity {
         if (wrongSound != null) wrongSound.release();
     }
 
-    // Class để lưu câu hỏi
     private static class QuizQuestion {
         int questionId;
         String content;

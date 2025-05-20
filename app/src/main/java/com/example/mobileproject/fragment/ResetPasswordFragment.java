@@ -40,7 +40,6 @@ public class ResetPasswordFragment extends Fragment {
     }
 
     public ResetPasswordFragment() {
-        // Required empty public constructor
     }
 
     public static ResetPasswordFragment newInstance(String phone) {
@@ -72,7 +71,6 @@ public class ResetPasswordFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.laylaimatkhau, container, false);
     }
 
@@ -80,17 +78,13 @@ public class ResetPasswordFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Liên kết với layout
         edtNewPassword = view.findViewById(R.id.getpassword_newpassword);
         edtConfirmPassword = view.findViewById(R.id.getpassword_confirmpassword);
         btnContinue = view.findViewById(R.id.getpassword_btn_continue);
 
-        // Xử lý nút Continue
         btnContinue.setOnClickListener(v -> {
             String newPassword = edtNewPassword.getText().toString().trim();
             String confirmPassword = edtConfirmPassword.getText().toString().trim();
-
-            // Kiểm tra mật khẩu
             if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
                 Toast.makeText(getContext(), "Vui lòng nhập đầy đủ mật khẩu", Toast.LENGTH_SHORT).show();
                 return;
@@ -99,14 +93,20 @@ public class ResetPasswordFragment extends Fragment {
                 Toast.makeText(getContext(), "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (newPassword.length() < 6) {
+                Toast.makeText(getContext(), "Mật khẩum mới phải có ít nhất 6 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (newPassword.length() > 30) {
+                Toast.makeText(getContext(), "Mật khẩu mới không quá 30 ký tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            // Tạo đối tượng User cho request
             User resetUser = new User();
             resetUser.setPhone(phone);
             resetUser.setPassword(newPassword);
             Log.d(TAG, "🔥 Request body: { phone: "+phone+", new_password: "+newPassword+" }");
 
-            // Gọi API bằng Retrofit
             ApiService apiService = RetrofitClient.getClient();
             Call<ResponseBody> call = apiService.resetPassword(resetUser);
             call.enqueue(new Callback<ResponseBody>() {

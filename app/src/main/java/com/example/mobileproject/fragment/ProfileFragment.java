@@ -8,15 +8,14 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -24,11 +23,11 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-
 import com.bumptech.glide.Glide;
 import com.example.mobileproject.ChangeProfileActivity;
 import com.example.mobileproject.PreviewActivity;
 import com.example.mobileproject.R;
+import com.example.mobileproject.ScoreActivity;
 
 public class ProfileFragment extends Fragment {
 
@@ -39,6 +38,7 @@ public class ProfileFragment extends Fragment {
     private ImageView profileAvatar, profileBtnChangeAvatar, profileBtnEdit;
     private TextView profileName;
     private EditText profileEmail, profilePassword, profilePhone;
+    private Button btnlichsu;
     private Uri selectedImageUri;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private SharedPreferences sharedPreferences;
@@ -52,11 +52,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        // Khởi tạo SharedPreferences
         sharedPreferences = requireContext().getSharedPreferences("user_info", getContext().MODE_PRIVATE);
-
-        // Khởi tạo các thành phần giao diện
         profileAvatar = view.findViewById(R.id.profile_avatar);
         profileBtnChangeAvatar = view.findViewById(R.id.profile_btnchangeavatar);
         profileBtnEdit = view.findViewById(R.id.profile_btnedit);
@@ -64,21 +60,19 @@ public class ProfileFragment extends Fragment {
         profileEmail = view.findViewById(R.id.profile_email);
         profilePassword = view.findViewById(R.id.profile_password);
         profilePhone = view.findViewById(R.id.profile_phone);
+        btnlichsu = view.findViewById(R.id.xemlichsulambai);
 
-        // Lấy thông tin người dùng từ SharedPreferences
         String fullName = sharedPreferences.getString("full_name", "Không có tên");
         String email = sharedPreferences.getString("email", "");
         String phone = sharedPreferences.getString("phone", "");
         String avatarUrl = sharedPreferences.getString("avatar_url", "");
 
-        // Hiển thị thông tin người dùng
         profileName.setText(fullName);
         profileEmail.setText(email);
         profilePhone.setText(phone);
-        profilePassword.setText("................."); // Placeholder cho mật khẩu
-        loadInitialAvatar(avatarUrl, fullName);
+        profilePassword.setText(".................");
+        loadInitialAvatar(avatarUrl);
 
-        // Khởi tạo launcher để chọn ảnh
         imagePickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
@@ -89,7 +83,6 @@ public class ProfileFragment extends Fragment {
                     }
                 });
 
-        // Xử lý sự kiện nhấn nút thay đổi ảnh đại diện
         profileBtnChangeAvatar.setOnClickListener(v -> {
             if (android.os.Build.VERSION.SDK_INT < 29 &&
                     ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -102,21 +95,24 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        // Xử lý sự kiện nhấn nút chỉnh sửa hồ sơ
         profileBtnEdit.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), ChangeProfileActivity.class);
-            intent.putExtra("name", profileName.getText().toString());
-            intent.putExtra("email", profileEmail.getText().toString());
-            intent.putExtra("phone", profilePhone.getText().toString());
+            intent.putExtra("name", fullName);
+            intent.putExtra("email", email);
+            intent.putExtra("phone", phone);
+            intent.putExtra("avatar_url",avatarUrl);
             startActivityForResult(intent, CHANGE_PROFILE_REQUEST_CODE);
+        });
+
+        btnlichsu.setOnClickListener(v->{
+            Intent intent = new Intent(requireContext(), ScoreActivity.class);
+            startActivity(intent);
         });
     }
 
-    private void loadInitialAvatar(String avatarUrl, String fullName) {
-        String url = avatarUrl != null && !avatarUrl.isEmpty()
-                ? avatarUrl
-                : "https://ui-avatars.com/api/?name=" + fullName.replace(" ", "+") + "&background=2196F3&color=fff&size=150";
-
+    private void loadInitialAvatar(String avatarUrl) {
+        String url = avatarUrl;
+        if(avatarUrl == null) url = "https://images.pexels.com/photos/462162/pexels-photo-462162.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2";
         Glide.with(this)
                 .load(url)
                 .placeholder(R.drawable.placeholder_image)
@@ -154,7 +150,6 @@ public class ProfileFragment extends Fragment {
                         .error(R.drawable.error_image)
                         .circleCrop()
                         .into(profileAvatar);
-                // Lưu URL ảnh mới vào SharedPreferences
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("avatar_url", newAvatarUrl);
                 editor.apply();
@@ -167,11 +162,9 @@ public class ProfileFragment extends Fragment {
             String updatedName = data.getStringExtra("name");
             String updatedEmail = data.getStringExtra("email");
             String updatedPhone = data.getStringExtra("phone");
-            // Cập nhật giao diện
             profileName.setText(updatedName);
             profileEmail.setText(updatedEmail);
             profilePhone.setText(updatedPhone);
-            // Lưu thông tin mới vào SharedPreferences
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString("full_name", updatedName);
             editor.putString("email", updatedEmail);
