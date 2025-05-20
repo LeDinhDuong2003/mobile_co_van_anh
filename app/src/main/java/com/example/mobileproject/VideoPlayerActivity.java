@@ -1,7 +1,7 @@
 package com.example.mobileproject;
 
-import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,35 +9,44 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import android.widget.VideoView;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.mobileproject.adapter.LessonAdapter;
 import com.example.mobileproject.api.ApiService;
 import com.example.mobileproject.api.RetrofitClient;
+import com.example.mobileproject.model.Enrollment; // Ensure this model is defined
 import com.example.mobileproject.model.Lesson;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class VideoPlayerActivity extends AppCompatActivity {
+    private static final String TAG = "VideoPlayerActivity";
     private int lessonId;
     private int courseId;
     private String videoUrl;
     private List<Lesson> lessons = new ArrayList<>();
     private RecyclerView lessonRecyclerView;
     private boolean isEnrolled;
+    private PlayerView playerView;
+    private ExoPlayer player;
+    private ProgressBar progressBar;
+    private Button enrollButton;
+    private Button actionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,61 +56,69 @@ public class VideoPlayerActivity extends AppCompatActivity {
         lessonId = getIntent().getIntExtra("lessonId", -1);
         courseId = getIntent().getIntExtra("courseId", -1);
 
+        Log.d(TAG, "Khởi tạo VideoPlayerActivity: lessonId=" + lessonId + ", courseId=" + courseId);
+
         if (lessonId == -1 || courseId == -1) {
-            Log.e("VideoPlayerActivity", "Invalid lessonId or courseId");
-            Toast.makeText(this, "Invalid data", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Không có lessonId hoặc courseId hợp lệ");
+            Toast.makeText(this, "Dữ liệu không hợp lệ", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        // Khởi tạo các view
         ImageView backButton = findViewById(R.id.back_button);
+        playerView = findViewById(R.id.playerView);
+        progressBar = findViewById(R.id.progressBar);
+        lessonRecyclerView = findViewById(R.id.lessonRecyclerView);
+        enrollButton = findViewById(R.id.enrollButton);
+        actionButton = findViewById(R.id.actionButton);
+
         if (backButton != null) {
             backButton.setOnClickListener(v -> finish());
         }
 
-        VideoView videoView = findViewById(R.id.videoView);
-        if (videoView == null) {
-            Log.e("VideoPlayerActivity", "videoView not found");
-            Toast.makeText(this, "Error initializing video player", Toast.LENGTH_SHORT).show();
+        if (playerView == null) {
+            Log.e(TAG, "Không tìm thấy playerView");
+            Toast.makeText(this, "Lỗi khởi tạo trình phát video", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        MediaController mediaController = new MediaController(this);
-        mediaController.setAnchorView(videoView);
-        videoView.setMediaController(mediaController);
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
 
+        if (lessonRecyclerView != null) {
+            lessonRecyclerView.setVisibility(View.GONE);
+        }
+
+        // Khởi tạo ExoPlayer
+        initializePlayer();
+
+        // Cấu hình BottomSheet và mở rộng ngay từ đầu
         LinearLayout bottomSheet = findViewById(R.id.bottomSheet);
-        if (bottomSheet == null) {
-            Log.e("VideoPlayerActivity", "bottomSheet not found");
-            Toast.makeText(this, "Error initializing lesson list", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
+        if (bottomSheet != null) {
+            BottomSheetBehavior<LinearLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
-        BottomSheetBehavior<LinearLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
-        lessonRecyclerView = findViewById(R.id.lessonRecyclerView);
-        if (lessonRecyclerView == null) {
-            Log.e("VideoPlayerActivity", "lessonRecyclerView not found");
-            Toast.makeText(this, "Error initializing lesson list", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-        lessonRecyclerView.setVisibility(View.GONE); // Ẩn RecyclerView ban đầu
+        // Thiết lập các nút
+        setupButtons();
 
+        // Tải dữ liệu bài học và danh sách bài học
         checkEnrollmentStatus();
         fetchLessonData();
         fetchLessonsForCourse();
     }
 
     private void checkEnrollmentStatus() {
-        Integer userId = MockAuthManager.getInstance().getCurrentUserId();
-        if (userId == null) {
-            Log.e("VideoPlayerActivity", "No user data available");
-            Toast.makeText(this, "User data not available", Toast.LENGTH_SHORT).show();
+        SharedPreferences prefs = getSharedPreferences("user_info", MODE_PRIVATE);
+        int userId = prefs.getInt("user_id", -1);
+
+        if (userId == -1) {
             isEnrolled = false;
-            setupButtons();
+            updateEnrollButtonVisibility();
+            Toast.makeText(this, "User data not available", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -112,49 +129,181 @@ public class VideoPlayerActivity extends AppCompatActivity {
             public void onResponse(Call<Boolean> call, Response<Boolean> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     isEnrolled = response.body();
-                    setupButtons();
+                    updateEnrollButtonVisibility();
+                    setupButtons(); // Update buttons after enrollment status is fetched
                 } else {
                     isEnrolled = false;
+                    updateEnrollButtonVisibility();
                     setupButtons();
-                    showErrorDialog("Failed to check enrollment status. Please try again.");
+                    Toast.makeText(VideoPlayerActivity.this, "Failed to check enrollment status", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Boolean> call, Throwable t) {
-                Log.e("VideoPlayerActivity", "Error checking enrollment", t);
+                Log.e(TAG, "Error checking enrollment", t);
                 isEnrolled = false;
+                updateEnrollButtonVisibility();
                 setupButtons();
-                showErrorDialog("Error: " + t.getMessage() + ". Please try again.");
+                Toast.makeText(VideoPlayerActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void setupButtons() {
-        Button favoriteButton = findViewById(R.id.favoriteButton);
-        Button actionButton = findViewById(R.id.actionButton);
+    private void initializePlayer() {
+        player = new ExoPlayer.Builder(this).build();
+        playerView.setPlayer(player);
 
-        if (favoriteButton != null) {
-            favoriteButton.setOnClickListener(v -> Toast.makeText(this, "Add to favorites", Toast.LENGTH_SHORT).show());
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                if (state == Player.STATE_READY) {
+                    if (progressBar != null) {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                } else if (state == Player.STATE_BUFFERING) {
+                    if (progressBar != null) {
+                        progressBar.setVisibility(View.VISIBLE);
+                    }
+                } else if (state == Player.STATE_ENDED) {
+                    Log.d(TAG, "Phát video kết thúc - chuyển đến bài tiếp theo");
+                    playNextLessonIfAvailable();
+                }
+            }
+
+            @Override
+            public void onPlayerError(PlaybackException error) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                Log.e(TAG, "Lỗi phát video: " + error.getMessage(), error);
+                Toast.makeText(VideoPlayerActivity.this, "Lỗi phát video: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                playVideoWithUrl("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4");
+            }
+        });
+    }
+
+    private void playNextLessonIfAvailable() {
+        int currentIndex = -1;
+        for (int i = 0; i < lessons.size(); i++) {
+            if (lessons.get(i).getLessonId() == lessonId) {
+                currentIndex = i;
+                break;
+            }
         }
 
-        if (actionButton != null) {
-            if (isEnrolled) {
-                actionButton.setText("Add Comment");
+        if (currentIndex >= 0 && currentIndex < lessons.size() - 1) {
+            Lesson nextLesson = lessons.get(currentIndex + 1);
+            lessonId = nextLesson.getLessonId();
+            videoUrl = nextLesson.getVideoUrl();
+
+            Log.d(TAG, "Tự động chuyển đến bài học tiếp theo: " + nextLesson.getTitle());
+            if (videoUrl != null && !videoUrl.isEmpty()) {
+                playVideoWithUrl(videoUrl);
+            }
+        }
+    }
+
+    private void playVideoWithUrl(String url) {
+        if (player == null) return;
+
+        try {
+            Log.d(TAG, "Đang phát video từ URL: " + url);
+            MediaItem mediaItem = MediaItem.fromUri(Uri.parse(url));
+            player.setMediaItem(mediaItem);
+            player.prepare();
+            player.play();
+        } catch (Exception e) {
+            Log.e(TAG, "Lỗi cài đặt URL video", e);
+            Toast.makeText(this, "Lỗi phát video: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setupButtons() {
+        Button favoriteButton = findViewById(R.id.favoriteButton);
+        enrollButton = findViewById(R.id.enrollButton);
+        actionButton = findViewById(R.id.actionButton);
+
+        // Favorite button is always visible
+        if (favoriteButton != null) {
+            favoriteButton.setVisibility(View.VISIBLE);
+            favoriteButton.setOnClickListener(v ->
+                    Toast.makeText(this, "Đã thêm vào danh sách yêu thích", Toast.LENGTH_SHORT).show());
+        }
+
+        // Set up actionButton and enrollButton based on isEnrolled
+        if (isEnrolled) {
+            if (actionButton != null) {
+                actionButton.setText("Bình luận");
+                actionButton.setVisibility(View.VISIBLE);
                 actionButton.setOnClickListener(v -> {
                     Intent intent = new Intent(VideoPlayerActivity.this, CommentActivity.class);
                     intent.putExtra("lessonId", lessonId);
                     startActivity(intent);
                 });
-            } else {
-                actionButton.setText("Buy Now");
-                actionButton.setOnClickListener(v -> Toast.makeText(this, "Redirect to purchase page", Toast.LENGTH_SHORT).show());
+            }
+            if (enrollButton != null) {
+                enrollButton.setVisibility(View.GONE);
+            }
+        } else {
+            if (actionButton != null) {
+                actionButton.setVisibility(View.GONE);
+            }
+            if (enrollButton != null) {
+                enrollButton.setVisibility(View.VISIBLE);
+                enrollButton.setOnClickListener(v -> enrollInCourse());
             }
         }
     }
 
+    private void enrollInCourse() {
+        SharedPreferences prefs = getSharedPreferences("user_info", MODE_PRIVATE);
+        int userId = prefs.getInt("user_id", -1);
+
+        if (userId == -1) {
+            Toast.makeText(this, "User data not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        enrollButton.setEnabled(false); // Disable button to prevent multiple clicks
+        ApiService apiService = RetrofitClient.getClient();
+        Map<String, Integer> requestBody = new HashMap<>();
+        requestBody.put("user_id", userId);
+        Call<Enrollment> call = apiService.enrollInCourse(courseId, requestBody);
+        call.enqueue(new Callback<Enrollment>() {
+            @Override
+            public void onResponse(Call<Enrollment> call, Response<Enrollment> response) {
+                enrollButton.setEnabled(true); // Re-enable button
+                if (response.isSuccessful() && response.body() != null) {
+                    isEnrolled = true;
+                    updateEnrollButtonVisibility();
+                    setupButtons(); // Update button states
+                    Toast.makeText(VideoPlayerActivity.this, "Successfully enrolled in the course!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(VideoPlayerActivity.this, "Failed to enroll. Please try again.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Enrollment> call, Throwable t) {
+                enrollButton.setEnabled(true); // Re-enable button
+                Log.e(TAG, "Error enrolling in course", t);
+                Toast.makeText(VideoPlayerActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateEnrollButtonVisibility() {
+        if (enrollButton != null) {
+            enrollButton.setVisibility(isEnrolled ? View.GONE : View.VISIBLE);
+        }
+        if (actionButton != null) {
+            actionButton.setVisibility(isEnrolled ? View.VISIBLE : View.GONE);
+        }
+    }
+
     private void fetchLessonData() {
-        ProgressBar progressBar = findViewById(R.id.progressBar);
+        Log.d(TAG, "Đang lấy thông tin bài học, lessonId: " + lessonId);
         if (progressBar != null) {
             progressBar.setVisibility(View.VISIBLE);
         }
@@ -167,28 +316,22 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 if (progressBar != null) {
                     progressBar.setVisibility(View.GONE);
                 }
+
                 if (response.isSuccessful() && response.body() != null) {
                     Lesson lesson = response.body();
                     videoUrl = lesson.getVideoUrl();
+                    Log.d(TAG, "Đã nhận được URL video từ API: " + videoUrl);
+
                     if (videoUrl != null && !videoUrl.isEmpty()) {
-                        try {
-                            VideoView videoView = findViewById(R.id.videoView);
-                            videoView.setVideoURI(Uri.parse(videoUrl));
-                            videoView.setOnPreparedListener(mp -> videoView.start());
-                            videoView.setOnErrorListener((mp, what, extra) -> {
-                                Log.e("VideoPlayerActivity", "Video playback error: what=" + what + ", extra=" + extra);
-                                Toast.makeText(VideoPlayerActivity.this, "Error playing video", Toast.LENGTH_SHORT).show();
-                                return true;
-                            });
-                        } catch (Exception e) {
-                            Log.e("VideoPlayerActivity", "Error setting video URI", e);
-                            showErrorDialog("Invalid video URL. Please try again.");
-                        }
+                        playVideoWithUrl(videoUrl);
                     } else {
-                        showErrorDialog("No video URL available. Please try again.");
+                        Log.e(TAG, "URL video từ API là null hoặc rỗng");
+                        playVideoWithUrl("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4");
                     }
                 } else {
-                    showErrorDialog("Failed to load lesson data. Please try again.");
+                    Log.e(TAG, "Lỗi API: " + response.code());
+                    playVideoWithUrl("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4");
+                    Toast.makeText(VideoPlayerActivity.this, "Không thể lấy dữ liệu video từ server", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -197,81 +340,119 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 if (progressBar != null) {
                     progressBar.setVisibility(View.GONE);
                 }
-                Log.e("VideoPlayerActivity", "Error fetching lesson data", t);
-                showErrorDialog("Error: " + t.getMessage() + ". Please try again.");
+                Log.e(TAG, "Lỗi kết nối API: " + t.getMessage(), t);
+                playVideoWithUrl("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4");
+                Toast.makeText(VideoPlayerActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void fetchLessonsForCourse() {
-        ProgressBar progressBar = findViewById(R.id.progressBar);
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
-
+        Log.d(TAG, "Đang lấy danh sách bài học cho khóa học: " + courseId);
         ApiService apiService = RetrofitClient.getClient();
         Call<List<Lesson>> call = apiService.getLessonsByCourseId(courseId);
         call.enqueue(new Callback<List<Lesson>>() {
             @Override
             public void onResponse(Call<List<Lesson>> call, Response<List<Lesson>> response) {
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
                 if (response.isSuccessful() && response.body() != null) {
                     lessons.clear();
                     lessons.addAll(response.body());
-                    setupLessonRecyclerView();
+                    Log.d(TAG, "Đã nhận được " + lessons.size() + " bài học từ API");
                 } else {
-                    showErrorDialog("Failed to load lessons. Please try again.");
+                    Log.e(TAG, "Lỗi API: " + response.code());
+                    lessons = createMockLessons();
+                    Log.d(TAG, "Sử dụng danh sách bài học mẫu do API thất bại");
                 }
+                setupLessonRecyclerView();
             }
 
             @Override
             public void onFailure(Call<List<Lesson>> call, Throwable t) {
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
-                Log.e("VideoPlayerActivity", "Error fetching lessons", t);
-                showErrorDialog("Error: " + t.getMessage() + ". Please try again.");
+                Log.e(TAG, "Lỗi kết nối API: " + t.getMessage(), t);
+                lessons = createMockLessons();
+                Log.d(TAG, "Sử dụng danh sách bài học mẫu do lỗi kết nối");
+                setupLessonRecyclerView();
             }
         });
     }
 
+    private List<Lesson> createMockLessons() {
+        List<Lesson> mockLessons = new ArrayList<>();
+        String[] sampleUrls = {
+                "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4",
+                "https://storage.googleapis.com/exoplayer-test-media-0/Jazz_In_Paris.mp3",
+                "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4",
+                "https://storage.googleapis.com/exoplayer-test-media-1/mp4/frame-counter-one-hour.mp4",
+                "https://storage.googleapis.com/exoplayer-test-media-0/play.mp3"
+        };
+
+        for (int i = 1; i <= 5; i++) {
+            Lesson lesson = new Lesson();
+            lesson.setLessonId(i);
+            lesson.setCourseId(courseId);
+            lesson.setTitle("Bài học " + i + ": " + getSampleTitle(i));
+            lesson.setVideoUrl(sampleUrls[(i - 1) % sampleUrls.length]);
+            lesson.setPosition(i);
+            lesson.setDuration(i * 300);
+            mockLessons.add(lesson);
+        }
+        return mockLessons;
+    }
+
+    private String getSampleTitle(int index) {
+        String[] titles = {
+                "Giới thiệu khóa học",
+                "Cơ bản về lập trình Android",
+                "Xây dựng layout với XML",
+                "Thao tác với cơ sở dữ liệu SQLite",
+                "Tương tác với API và mạng"
+        };
+        return titles[(index - 1) % titles.length];
+    }
+
     private void setupLessonRecyclerView() {
+        if (lessonRecyclerView == null) return;
+
         lessonRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         LessonAdapter adapter = new LessonAdapter(lessons, LessonAdapter.TYPE_PAGE_2, lesson -> {
             lessonId = lesson.getLessonId();
             videoUrl = lesson.getVideoUrl();
+            Log.d(TAG, "Đã chọn bài học: " + lesson.getTitle() + ", videoUrl: " + videoUrl);
             if (videoUrl != null && !videoUrl.isEmpty()) {
-                try {
-                    VideoView videoView = findViewById(R.id.videoView);
-                    videoView.setVideoURI(Uri.parse(videoUrl));
-                    videoView.start();
-                } catch (Exception e) {
-                    Toast.makeText(VideoPlayerActivity.this, "Error switching video", Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(this, "Đang phát: " + lesson.getTitle(), Toast.LENGTH_SHORT).show();
+                playVideoWithUrl(videoUrl);
             } else {
-                Toast.makeText(VideoPlayerActivity.this, "No video available", Toast.LENGTH_SHORT).show();
+                playVideoWithUrl("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4");
+                Toast.makeText(this, "Đang phát video mẫu cho: " + lesson.getTitle(), Toast.LENGTH_SHORT).show();
             }
         });
         lessonRecyclerView.setAdapter(adapter);
-        lessonRecyclerView.setVisibility(View.VISIBLE); // Hiển thị sau khi gán adapter
+        lessonRecyclerView.setVisibility(View.VISIBLE);
+        Log.d(TAG, "Đã thiết lập RecyclerView với " + lessons.size() + " bài học");
     }
 
-    private void showErrorDialog(String message) {
-        new AlertDialog.Builder(this)
-                .setTitle("Error")
-                .setMessage(message)
-                .setPositiveButton("Retry", (dialog, which) -> {
-                    if (message.contains("lesson data")) {
-                        fetchLessonData();
-                    } else if (message.contains("lessons")) {
-                        fetchLessonsForCourse();
-                    } else {
-                        checkEnrollmentStatus();
-                    }
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> finish())
-                .show();
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (player != null) {
+            player.pause();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (player != null) {
+            player.play();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (player != null) {
+            player.release();
+            player = null;
+        }
     }
 }
