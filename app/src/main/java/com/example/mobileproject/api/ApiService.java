@@ -12,6 +12,8 @@ import com.example.mobileproject.model.Lesson;
 import com.example.mobileproject.model.NotificationCreate;
 import com.example.mobileproject.model.NotificationModel;
 import com.example.mobileproject.model.PagedResponse;
+import com.example.mobileproject.model.PaginatedCommentsResponse;
+import com.example.mobileproject.model.PaginatedReviewsResponse;
 import com.example.mobileproject.model.Review;
 import com.example.mobileproject.model.ScoreResponse;
 import com.example.mobileproject.model.User;
@@ -40,10 +42,18 @@ public interface ApiService {
     Call<List<Lesson>> getLessonsByCourseId(@Path("courseId") int courseId);
 
     @GET("courses/{courseId}/reviews")
-    Call<List<Review>> getReviewsByCourseId(@Path("courseId") int courseId);
+    Call<PaginatedReviewsResponse> getReviewsByCourseId(
+            @Path("courseId") int courseId,
+            @Query("page") int page,
+            @Query("size") int size
+    );
 
     @GET("lessons/{lessonId}/comments")
-    Call<List<Comment>> getCommentsByLessonId(@Path("lessonId") int lessonId);
+    Call<PaginatedCommentsResponse> getCommentsByLessonId(
+            @Path("lessonId") int lessonId,
+            @Query("page") int page,
+            @Query("size") int size
+    );
 
     @POST("reviews")
     Call<Review> addReview(@Body Review review);
@@ -101,6 +111,9 @@ public interface ApiService {
 
     @POST("courses/{courseId}/enrollments")
     Call<Enrollment> enrollInCourse(@Path("courseId") int courseId, @Body Map<String, Integer> requestBody);
+
+    @GET("courses/{courseId}/enrollment-count")
+    Call<Integer> getEnrollmentCount(@Path("courseId") int courseId);
 
     @GET("users/{userId}/notifications")
     Call<List<NotificationModel>> getUserNotifications(@Path("userId") int userId);
