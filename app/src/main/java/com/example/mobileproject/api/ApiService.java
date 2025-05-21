@@ -9,6 +9,7 @@ import com.example.mobileproject.model.Enrollment;
 import com.example.mobileproject.model.FCMTokenRequest;
 import com.example.mobileproject.model.FCMTokenResponse;
 import com.example.mobileproject.model.Lesson;
+import com.example.mobileproject.model.NotificationCreate;
 import com.example.mobileproject.model.NotificationModel;
 import com.example.mobileproject.model.PagedResponse;
 import com.example.mobileproject.model.Review;
@@ -124,4 +125,6 @@ public interface ApiService {
 
     @GET("wishlists/check")
     Call<Boolean> checkWishlist(@Query("userId") int userId, @Query("courseId") int courseId);
+    @POST("notifications/create-for-users")
+    Call<NotificationModel> createNotificationForUsers(@Body NotificationCreate notification);
 }
