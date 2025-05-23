@@ -269,7 +269,7 @@ public class CodeFragment extends Fragment {
                         proceedAfterResend(code);
                     } else {
                         Log.e(TAG, "🔥 SMS failed: " + errorText);
-                        Toast.makeText(getContext(), "Không thể gửi SMS: " + errorText + ". Mã xác nhận: " + code, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Không thể gửi SMS hết tiền trong tài khoản " + ". Mã xác nhận: " + code, Toast.LENGTH_LONG).show();
                         proceedAfterResend(code);
                     }
                 });

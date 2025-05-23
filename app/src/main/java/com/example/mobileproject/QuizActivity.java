@@ -53,6 +53,7 @@ public class QuizActivity extends AppCompatActivity {
         timeProgress = findViewById(R.id.timeProgress);
         sharedPreferences = getSharedPreferences("user_info", MODE_PRIVATE);
         LESSION_ID = sharedPreferences.getInt("lession_id", 1);
+        Log.d(TAG, "🔥 lession_id " + LESSION_ID);
         options[0] = findViewById(R.id.option1);
         options[1] = findViewById(R.id.option2);
         options[2] = findViewById(R.id.option3);

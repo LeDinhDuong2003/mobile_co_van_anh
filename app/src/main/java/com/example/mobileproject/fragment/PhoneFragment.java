@@ -177,7 +177,7 @@ public class PhoneFragment extends Fragment {
                         proceedToEnterCode(phone, code);
                     } else {
                         Log.e(TAG, "🔥 SMS failed: " + errorText);
-                        Toast.makeText(getContext(), "Không thể gửi SMS: " + errorText + ". Mã xác nhận: " + code, Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Không thể gửi SMS do hết tiền trong tài khoản " + ". Mã xác nhận: " + code, Toast.LENGTH_LONG).show();
                         proceedToEnterCode(phone, code);
                     }
                 });

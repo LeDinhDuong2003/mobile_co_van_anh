@@ -46,6 +46,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private Button enrollButton;
     private Button actionButton;
     private Button quizButton; // Thêm biến cho quizButton
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -238,7 +239,11 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 quizButton.setVisibility(View.VISIBLE);
                 quizButton.setOnClickListener(v -> {
                     Intent intent = new Intent(VideoPlayerActivity.this, CountdownActivity.class);
-                    intent.putExtra("lession_id", lessonId);
+//                    intent.putExtra("lession_id", lessonId);
+                    sharedPreferences = getSharedPreferences("user_info", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("lession_id", lessonId);
+                    editor.apply();
                     startActivity(intent);
                 });
             }
