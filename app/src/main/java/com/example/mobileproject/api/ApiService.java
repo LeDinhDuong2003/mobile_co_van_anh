@@ -134,6 +134,9 @@ public interface ApiService {
     @GET("users/{userId}/wishlists")
     Call<List<CourseResponse>> getUserWishlists(@Path("userId") int userId);
 
+    @GET("users/{userId}/enrollments")
+    Call<List<CourseResponse>> getUserEnrollments(@Path("userId") int userId);
+
     @POST("wishlists/add")
     Call<WishlistResponse> addToWishlist(@Body WishlistRequest request);
 
