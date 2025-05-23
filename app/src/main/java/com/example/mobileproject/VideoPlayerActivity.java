@@ -237,7 +237,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
             if (quizButton != null) {
                 quizButton.setVisibility(View.VISIBLE);
                 quizButton.setOnClickListener(v -> {
-                    Intent intent = new Intent(VideoPlayerActivity.this, QuizActivity.class);
+                    Intent intent = new Intent(VideoPlayerActivity.this, CountdownActivity.class);
                     intent.putExtra("lession_id", lessonId);
                     startActivity(intent);
                 });
